@@ -22,7 +22,7 @@ Please refer to the following documentation for setting up the environment for E
 
 The project structure is as follows:
 
-![project](doc\.upload\project.png)
+![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/project.png)
 
 
 
@@ -34,19 +34,17 @@ The project structure is as follows:
 idf.py menuconfig
 ```
 
-![menuconfig_1](doc\.upload\menuconfig_1.png)
+![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/menuconfig_1.png)
 
 ##### 2. Or double-click on the sdkconfig file in the Project Explorer on the left side of eclipse.
 
-![sdkconfig](doc\.upload\sdkconfig.png)
+![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/sdkconfig.png)
 
 ##### 3. Select Example Configuration and enter your Wifi SSID and PASSWORD.
 
-![menuconfig_wifi_config](doc\.upload\menuconfig_wifi_config.png)
+![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/menuconfig_wifi_config.png)
 
-![sdkconfig_wifi_config](doc\.upload\sdkconfig_wifi_config.png)
-
-
+![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/sdkconfig_wifi_config.png)
 
 ## Test your project
 
