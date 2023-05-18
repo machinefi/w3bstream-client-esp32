@@ -22,7 +22,7 @@ Please refer to the following documentation for setting up the environment for E
 
 The project structure is as follows:
 
-![project](.upload\project.png)
+![project](img\project.png)
 
 
 
@@ -34,17 +34,17 @@ The project structure is as follows:
 idf.py menuconfig
 ```
 
-![menuconfig_1](.upload\menuconfig_1.png)
+![menuconfig_1](img\menuconfig_1.png)
 
 ##### 2. Or double-click on the sdkconfig file in the Project Explorer on the left side of eclipse.
 
-![sdkconfig](.upload\sdkconfig.png)
+![sdkconfig](img\sdkconfig.png)
 
 ##### 3. Select Example Configuration and enter your Wifi SSID and PASSWORD.
 
-![menuconfig_wifi_config](.upload\menuconfig_wifi_config.png)
+![menuconfig_wifi_config](img\menuconfig_wifi_config.png)
 
-![sdkconfig_wifi_config](.upload\sdkconfig_wifi_config.png)
+![sdkconfig_wifi_config](img\sdkconfig_wifi_config.png)
 
 
 
