@@ -1,0 +1,17 @@
+[package]
+name = "verify_wasm"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+ws-sdk =  { version = "0.1.13", features = ["crypto"]}
+anyhow = "1.0.69"
+serde_json = "1.0.93"
+serde = { version = "1.0.152", features = ["derive"] }
+hex = "0.4.3"
+
