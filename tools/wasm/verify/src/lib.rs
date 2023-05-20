@@ -48,6 +48,10 @@ fn handle(rid: i32) -> Result<()> {
     assert!(crypto::secp256k1::verify(&pubkey_hex, message.as_bytes(), &sig).is_ok());
     log_info("demo verify pass!").unwrap();
 
+    let item = payload["user"].as_object().unwrap();
+    let message = serde_json::to_string(&item).unwrap();
+  
+    log_info(&format!("user value: {}", message))?;
     assert!(crypto::secp256k1::verify(PUBK_HEX, message.as_bytes(), sign).is_ok());
     log_info("dev upload verify pass!").unwrap();
 
