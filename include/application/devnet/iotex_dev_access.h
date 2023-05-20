@@ -8,6 +8,8 @@
 
 #include "iotex_dev_access_config.h"
 
+#include "cJSON/cJSON.h"
+
 #define IOTEX_KEEP_ALIVE                        60
 #define IOTEX_MAX_TOPIC_NUM                     1
 #define IOTEX_MAX_TOPIC_SIZE                    64
@@ -159,10 +161,11 @@ int iotex_dev_access_set_mqtt_status(enum IOTEX_MQTT_STATUS status);
 int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len);
 int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *dev_address);
 
-int iotex_dev_access_data_upload_example(void);
-int iotex_dev_access_data_with_sign_upload_example(unsigned char *pubkey, int pubkey_len);
-int iotex_dev_access_data_with_pubky_upload_example(unsigned char *pubkey, int pubkey_len);
+int iotex_dev_access_data_upload_example_with_pubky(unsigned char *pubkey, int pubkey_len);
 int iotex_dev_access_data_upload_example_with_protobuf(char *string_buf, int buf_len);
+int iotex_dev_access_data_upload_example_with_json(void);
+
+int iotex_dev_access_data_upload_with_json_payload(cJSON *item);
 
 #ifdef __cplusplus
 }

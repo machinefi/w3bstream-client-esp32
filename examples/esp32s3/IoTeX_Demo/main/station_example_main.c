@@ -654,6 +654,17 @@ void iotex_import_key_example(void)
 #endif
 
 }
+
+void iotex_devnet_upload_data_example_json(void) {
+
+	cJSON *user_data = cJSON_CreateObject();
+
+	cJSON_AddNumberToObject(user_data, "sensor1", 10);
+	cJSON_AddNumberToObject(user_data, "sensor2", 5.5);
+
+	iotex_dev_access_data_upload_with_json_payload(user_data);
+}
+
 extern void default_SetSeed(unsigned int seed);
 void app_main(void)
 {
@@ -710,7 +721,7 @@ void app_main(void)
 
     	vTaskDelay(5000 / portTICK_PERIOD_MS);
 
-    	iotex_dev_access_data_upload_example_with_protobuf("hello devnet", strlen("hello devnet"));
+    	iotex_devnet_upload_data_example_json();
 
     }
 }

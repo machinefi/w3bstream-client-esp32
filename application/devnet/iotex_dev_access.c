@@ -305,7 +305,7 @@ exit:
 	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 }
 
-int iotex_dev_access_data_upload_example(void) {
+int iotex_dev_access_data_upload_example_with_json(void) {
 
 	char base64_buf[500] = {0};
 	char time_str[20] = {0};
@@ -387,99 +387,7 @@ int iotex_dev_access_data_upload_example(void) {
  	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 }
 
-int iotex_dev_access_data_with_sign_upload_example(unsigned char *pubkey, int pubkey_len) {
-
-	char base64_buf[500] = {0};
-//	char time_str[20] = {0};
-	int  base64_buf_len  = 0;
-	char *json_string = NULL;
-
-	char sign_buf[64]  = {0};
-	char sign_str[150] = {0};
-	unsigned int  sign_len = 0;
-
-	char pubkey_str[150] = {0};
-
-	time_t now = IOTEX_PUB_TIME_TEST_DEFAULT;
-
-    if ( NULL == dev_ctx || 0 == dev_ctx->inited ) {
-        return IOTEX_DEV_ACCESS_ERR_NO_INIT;
-    }
-
-	if (dev_ctx->mqtt_ctx.status < IOTEX_MQTT_CONNECTED )
-		return IOTEX_DEV_ACCESS_ERR_LINK_NOT_ESTABLISH;
-
-	if ( dev_ctx->get_time_func )
-		now = dev_ctx->get_time_func();
-
-#if IOTEX_USE_SIGN_FUNC_EXT
-	if ( !dev_ctx->crypto_ctx.sign_func )
-		return IOTEX_DEV_ACCESS_ERR_SIGN_FUNC_EMPTY;
-#endif
-
-	cJSON *w3b_data = cJSON_CreateObject();
-	cJSON *sensor	= cJSON_CreateObject();
-//	cJSON *sign  	= cJSON_CreateObject();
-	cJSON *payload	= cJSON_CreateObject();
-
-
-	cJSON *header	= cJSON_CreateObject();
-	cJSON_AddStringToObject(header, "event_type", IOTEX_EVENT_TYPE_DEFAULT);
-	cJSON_AddStringToObject(header, "pub_id",     IOTEX_PUB_ID_DEFAULT);
-	cJSON_AddStringToObject(header, "token",      IOTEX_TOKEN_DEFAULT);
-	cJSON_AddNumberToObject(header, "pub_time",   now);
- 	cJSON_AddItemToObject(w3b_data, "header", header);
-
- 	// sensor data
- 	cJSON_AddNumberToObject(sensor, "snr", 243);
- 	cJSON_AddNumberToObject(sensor, "vbat", 5.5);
-
- 	cJSON_AddItemToObject(payload, "sensor", sensor);
-
- 	// sign data
-#if IOTEX_USE_SIGN_FUNC_EXT
- 	dev_ctx->crypto_ctx.sign_func((const uint8_t *)"iotex_sample", strlen("iotex_sample"), (uint8_t *)sign_buf, &sign_len);
-#else
- 	psa_sign_message( key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256), (const uint8_t *)"iotex_sample", strlen("iotex_sample"), (uint8_t *)sign_buf, 64, &sign_len);
-#endif
-
- 	iotex_hex2str((uint8_t *)sign_buf, sign_len, sign_str);
- 	cJSON_AddStringToObject(payload, "sign", sign_str);
-
- 	iotex_hex2str((uint8_t *)pubkey, pubkey_len, pubkey_str);
- 	cJSON_AddStringToObject(payload, "pubkey", pubkey_str);
-
- 	json_string = cJSON_PrintUnformatted(payload);
-#ifdef IOTEX_DEBUG_ENABLE
- 	if( dev_ctx->debug_enable ) {
- 		printf("json payload[%d] : %s\n", strlen(json_string), json_string);
- 	}
-#endif
-
- 	base64_encode(json_string, strlen(json_string), base64_buf, &base64_buf_len);
-#ifdef IOTEX_DEBUG_ENABLE
- 	if( dev_ctx->debug_enable ) {
- 		printf("base64 payload[%d] : %s\n", strlen(base64_buf), base64_buf);
- 	}
-#endif
-
- 	cJSON_AddStringToObject(w3b_data, "payload", base64_buf);
-
- 	json_string = cJSON_PrintUnformatted(w3b_data);
-#ifdef IOTEX_DEBUG_ENABLE
- 	if( dev_ctx->debug_enable ) {
- 		printf("json data[%d] : %s\n", strlen(json_string), json_string);
- 	}
-#endif
-
- 	iotex_dev_access_send_data((unsigned char *)json_string, strlen(json_string));
-
- 	cJSON_Delete(w3b_data);
-
- 	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
-}
-
-int iotex_dev_access_data_with_pubky_upload_example(unsigned char *pubkey, int pubkey_len) {
+int iotex_dev_access_data_upload_example_with_pubky(unsigned char *pubkey, int pubkey_len) {
 
 	char base64_buf[500] = {0};
 	int  base64_buf_len  = 0;
@@ -549,6 +457,84 @@ int iotex_dev_access_data_with_pubky_upload_example(unsigned char *pubkey, int p
 void iotex_dev_access_loop(void) {
 
 	// TODO: Loop code here
+}
+
+int iotex_dev_access_data_upload_with_json_payload(cJSON *item) {
+
+	char sign_buf[64]  = {0};
+	char sign_str[150] = {0};
+	unsigned int  sign_len = 0;
+	char *json_string = NULL;
+
+	unsigned char *buffer = malloc(Event_size);
+
+	pb_ostream_t ostream_event = {0};
+	Event  pb_event  = Event_init_zero;
+	cJSON *payload	= cJSON_CreateObject();
+
+	if (NULL == item)
+		return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
+
+	cJSON_AddItemToObject(payload, "user", item);
+	json_string = cJSON_PrintUnformatted(item);
+
+ 	psa_sign_message( key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256), (const uint8_t *)json_string, strlen(json_string), (uint8_t *)sign_buf, 64, &sign_len);
+ 	if (json_string) {
+		free(json_string);
+		json_string = NULL;
+ 	}
+
+ 	iotex_hex2str((uint8_t *)sign_buf, sign_len, sign_str);
+ 	cJSON_AddStringToObject(payload, "sign", sign_str);
+
+ 	json_string = cJSON_PrintUnformatted(payload);
+
+	pb_event.has_header = true;
+
+	strcpy(pb_event.header.event_id, IOTEX_EVENT_ID_DEFAULT);
+	strcpy(pb_event.header.pub_id,   IOTEX_PUB_ID_DEFAULT);
+	strcpy(pb_event.header.event_type, IOTEX_EVENT_TYPE_DEFAULT);
+	strcpy(pb_event.header.token, IOTEX_TOKEN_DEFAULT);
+	pb_event.header.pub_time = IOTEX_PUB_TIME_TEST_DEFAULT;
+
+
+	pb_event.payload.size = strlen(json_string);
+	strcpy((char *)pb_event.payload.bytes, json_string);
+
+	memset(buffer, 0, Event_size);
+	ostream_event  = pb_ostream_from_buffer(buffer, Event_size);
+	if (!pb_encode(&ostream_event, Event_fields, &pb_event)) {
+		printf("pb encode [event] error in [%s]\n", PB_GET_ERROR(&ostream_event));
+		goto exit;
+	}
+
+#ifdef IOTEX_DEBUG_ENABLE
+	printf("Event Upload len %d\n", ostream_event.bytes_written);
+
+	for (int i = 0; i < ostream_event.bytes_written; i++) {
+		printf("%02x ", buffer[i]);
+	}
+	printf("\n");
+#endif
+
+	iotex_dev_access_send_data(buffer, ostream_event.bytes_written);
+
+exit:
+	if(json_string) {
+		free(json_string);
+		json_string = NULL;
+	}
+
+	if(buffer) {
+		free(buffer);
+		buffer = NULL;
+	}
+
+	if(payload) {
+		cJSON_Delete(payload);
+	}
+
+	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 }
 
 int iotex_dev_access_set_mqtt_status(enum IOTEX_MQTT_STATUS status) {
