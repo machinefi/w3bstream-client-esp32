@@ -36,7 +36,7 @@ idf_component_register(SRCS "wsiotsdk.c"
 							"application/devnet/ProtoBuf/pb_decode.c"
 							"application/devnet/ProtoBuf/pb_encode.c"
 							"application/devnet/base64/base64.c"
-                    INCLUDE_DIRS "include" "include/application/devnet"
+                    INCLUDE_DIRS "include" "include/application/devnet" "include/backends"
                     REQUIRES mbedtls)
                     
 target_compile_options(${COMPONENT_LIB} PRIVATE "-Wno-format")                    

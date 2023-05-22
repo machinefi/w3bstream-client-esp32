@@ -1,6 +1,6 @@
 #include <string.h>
-#include "psa_layer/common.h"
-#include "psa_layer/iotex/platform.h"
+#include "common.h"
+#include "iotex/platform.h"
 
 #define IOTEX_PSA_CRYPTO_C
 #define IOTEX_PSA_CRYPTO_ACCELERATION_ENABLE
@@ -8,8 +8,8 @@
 
 #if defined(IOTEX_PSA_CRYPTO_C)
 #if defined(IOTEX_PSA_CRYPTO_ACCELERATION_ENABLE) && defined(IOTEX_CRYPTO_CIPHER_ACCELETATION_SUPPORT)
-#include <psa_layer/crypto/psa_crypto_core.h>
-#include <psa_layer/crypto/psa_crypto_cipher.h>
+#include <server/crypto/psa_crypto_core.h>
+#include <server/crypto/psa_crypto_cipher.h>
 #if defined(IOTEX_CRYPTO_USE_ACCELERATION_MBEDTLS)
 #include "mbedtls/cipher.h"
 #endif

@@ -18,19 +18,19 @@
 
 #include "iotex/platform.h"
 
-#include "crypto/psa_crypto_all.h"
+#include "server/crypto/psa_crypto_all.h"
 
 #if defined(IOTEX_PSA_CRYPTO_C)
 
 #if defined(IOTEX_PSA_CRYPTO_ACCELERATION_ENABLE)
 #if defined(IOTEX_CRYPTO_SHA_ACCELETATION_SUPPORT)
-#include "psa_layer/acc/acc_driver_hash.h"
+#include "server/acc/acc_driver_hash.h"
 #endif
 #if defined(IOTEX_CRYPTO_CIPHER_ACCELETATION_SUPPORT)
-#include "psa_layer/acc/acc_driver_cipher.h"
+#include "server/acc/acc_driver_cipher.h"
 #endif
 #if defined(IOTEX_CRYPTO_RSA_ACCELETATION_SUPPORT)
-#include "psa_layer/acc/acc_driver_rsa.h"
+#include "server/acc/acc_driver_rsa.h"
 #endif
 #endif
 

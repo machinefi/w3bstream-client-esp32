@@ -4,9 +4,9 @@
 
 #if defined(IOTEX_PSA_CRYPTO_C)
 
-#include "svc/crypto.h"
-#include "crypto/psa_crypto_core.h"
-#include "crypto/psa_crypto_hash.h"
+#include "server/crypto.h"
+#include "server/crypto/psa_crypto_core.h"
+#include "server/crypto/psa_crypto_hash.h"
 
 #include "iotex/error.h"
 #include <string.h>

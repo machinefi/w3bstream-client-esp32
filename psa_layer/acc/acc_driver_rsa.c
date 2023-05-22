@@ -1,11 +1,11 @@
 #include <string.h>
-#include "psa_layer/common.h"
-#include "psa_layer/iotex/platform.h"
+#include "common.h"
+#include "iotex/platform.h"
 
 #if defined(IOTEX_PSA_CRYPTO_C)
 #if defined(IOTEX_PSA_CRYPTO_ACCELERATION_ENABLE) && defined(IOTEX_CRYPTO_RSA_ACCELETATION_SUPPORT)
-#include <psa_layer/crypto/psa_crypto_core.h>
-#include <psa_layer/crypto/psa_crypto_rsa.h>
+#include <server/crypto/psa_crypto_core.h>
+#include <server/crypto/psa_crypto_rsa.h>
 #if defined(IOTEX_CRYPTO_USE_ACCELERATION_MBEDTLS)
 #include "mbedtls/rsa.h"
 #endif

@@ -2,12 +2,12 @@
 
 #if defined(IOTEX_PSA_CRYPTO_C)
 
-#include "svc/crypto.h"
-#include "svc/crypto_values.h"
-#include "crypto/psa_crypto_core.h"
-#include "crypto/psa_crypto_random_impl.h"
-#include "crypto/psa_crypto_rsa.h"
-#include "crypto/psa_crypto_hash.h"
+#include "server/crypto.h"
+#include "server/crypto_values.h"
+#include "server/crypto/psa_crypto_core.h"
+#include "server/crypto/psa_crypto_random_impl.h"
+#include "server/crypto/psa_crypto_rsa.h"
+#include "server/crypto/psa_crypto_hash.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +20,7 @@
 #include "iotex/rsa.h"
 #include "iotex/error.h"
 #include "iotex/pk.h"
-#include "pk_wrap.h"
+#include "server/pk_wrap.h"
 
 #if defined(IOTEX_PSA_BUILTIN_ALG_RSA_PKCS1V15_CRYPT) || \
     defined(IOTEX_PSA_BUILTIN_ALG_RSA_OAEP) || \

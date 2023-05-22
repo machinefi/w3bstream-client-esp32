@@ -25,7 +25,7 @@
 
 #if defined(IOTEX_CIPHER_C)
 
-#include "cipher_wrap.h"
+#include "server/cipher_wrap.h"
 #include "iotex/error.h"
 
 #if defined(IOTEX_CHACHAPOLY_C)

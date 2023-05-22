@@ -24,12 +24,12 @@
 #include "iotex/check_crypto_config.h"
 #endif
 
-#include "svc/crypto.h"
-#include "svc/crypto_values.h"
+#include "server/crypto.h"
+#include "server/crypto_values.h"
 
-#include "crypto/psa_crypto_all.h"
+#include "server/crypto/psa_crypto_all.h"
 
-#include "crypto/psa_crypto_random_impl.h"
+#include "server/crypto/psa_crypto_random_impl.h"
 
 #include <assert.h>
 #include <stdlib.h>

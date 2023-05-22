@@ -8,13 +8,13 @@
 #include "check_crypto_config.h"
 #endif
 
-#include "svc/crypto.h"
-#include "svc/crypto_values.h"
+#include "server/crypto.h"
+#include "server/crypto_values.h"
 
-#include "crypto/psa_crypto_all.h"
+#include "server/crypto/psa_crypto_all.h"
 #include "iotex/iotex_crypto_all.h"
 
-#include "crypto/psa_crypto_random_impl.h"
+#include "server/crypto/psa_crypto_random_impl.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -25,7 +25,7 @@
 #define iotex_free   free
 #endif
 
-#include "cipher_wrap.h"
+#include "server/cipher_wrap.h"
 
 #if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_IOTEX))
 #include "iotex/aes.h"
@@ -58,21 +58,15 @@
 #include "iotex/sha512.h"
 #elif ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_TINYCRYPO))
 
-#include "../crypto/constants.h"
-#include "../crypto/sha256.h"
-#include "../crypto/ecc.h"
-#include "../crypto/ecc_dh.h"
-#include "../crypto/ecc_dsa.h"
-#include "../crypto/ecc_platform_specific.h"
-#include "../crypto/aes.h"
-#include "../crypto/hmac_prng.h"
-#include "../crypto/ctr_mode.h"
-
-
-//#include "mbedtls/platform.h"
-//#include "mbedtls/sha1.h"
-//#include "mbedtls/sha256.h"
-//#include "mbedtls/sha512.h"
+#include "tinycryt/constants.h"
+#include "tinycryt/sha256.h"
+#include "tinycryt/ecc.h"
+#include "tinycryt/ecc_dh.h"
+#include "tinycryt/ecc_dsa.h"
+#include "tinycryt/ecc_platform_specific.h"
+#include "tinycryt/aes.h"
+#include "tinycryt/hmac_prng.h"
+#include "tinycryt/ctr_mode.h"
 
 #endif
 

@@ -27,9 +27,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "ctr_prng.h"
-#include "utils.h"
-#include "constants.h"
+#include "tinycryt/ctr_prng.h"
+#include "tinycryt/utils.h"
+#include "tinycryt/constants.h"
 #include <string.h>
 
 /*

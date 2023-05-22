@@ -13,7 +13,7 @@
 #include "ProtoBuf/pb_decode.h"
 #include "ProtoBuf/pb_encode.h"
 
-#include "psa_layer/svc/crypto.h"
+#include "psa/crypto.h"
 
 extern psa_key_id_t key_id;
 

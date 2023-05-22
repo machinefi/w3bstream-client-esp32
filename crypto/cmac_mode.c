@@ -30,10 +30,10 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "aes.h"
-#include "cmac_mode.h"
-#include "constants.h"
-#include "utils.h"
+#include "tinycryt/aes.h"
+#include "tinycryt/cmac_mode.h"
+#include "tinycryt/constants.h"
+#include "tinycryt/utils.h"
 
 /* max number of calls until change the key (2^48).*/
 static const uint64_t MAX_CALLS = ((uint64_t)1 << 48);
