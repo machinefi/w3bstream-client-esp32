@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+message user_data {
+  int32  sensor_1   = 1;
+  double sensor_2   = 2;
+  bool   sensor_3   = 3;
+}
+
+message Payload {
+
+  enum UserDataType {
+    JSON = 0;
+    PB   = 1;
+    RAW  = 2;
+  }
+
+  bytes        sign = 1;
+  UserDataType type = 2;
+  bytes        user = 3;
+}

@@ -14,4 +14,8 @@ anyhow = "1.0.69"
 serde_json = "1.0.93"
 serde = { version = "1.0.152", features = ["derive"] }
 hex = "0.4.3"
+protobuf = "3"
+
+[build-dependencies]
+protobuf-codegen = "3"
 
