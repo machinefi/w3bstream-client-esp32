@@ -9,6 +9,13 @@
 #include "iotex_dev_access_config.h"
 
 #include "cJSON/cJSON.h"
+#include "base64/base64.h"
+#include "keccak256/keccak256.h"
+#include "ProtoBuf/pb_common.h"
+#include "ProtoBuf/pb_decode.h"
+#include "ProtoBuf/pb_encode.h"
+#include "ProtoBuf/devnet_upload.pb.h"
+
 
 #define IOTEX_KEEP_ALIVE                        60
 #define IOTEX_MAX_TOPIC_NUM                     1
@@ -61,6 +68,12 @@ enum MQTT_PUB_TOPIC{
     IOTEX_MQTT_QUERY_STATUS,
     IOTEX_MQTT_PROPOSER,
     IOTEX_MQTT_PUB_TOPICS
+};
+
+enum UserData_Type {
+    IOTEX_USER_DATA_TYPE_JSON = 0,
+	IOTEX_USER_DATA_TYPE_PB,
+	IOTEX_USER_DATA_TYPE_RAW
 };
 
 typedef time_t (*iotex_gettime)(void);
@@ -161,11 +174,7 @@ int iotex_dev_access_set_mqtt_status(enum IOTEX_MQTT_STATUS status);
 int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len);
 int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *dev_address);
 
-int iotex_dev_access_data_upload_example_with_pubky(unsigned char *pubkey, int pubkey_len);
-int iotex_dev_access_data_upload_example_with_protobuf(char *string_buf, int buf_len);
-int iotex_dev_access_data_upload_example_with_json(void);
-
-int iotex_dev_access_data_upload_with_json_payload(cJSON *item);
+int iotex_dev_access_data_upload_with_userdate(void *buf, size_t buf_len, enum UserData_Type type);
 
 #ifdef __cplusplus
 }

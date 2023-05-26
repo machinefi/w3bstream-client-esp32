@@ -96,7 +96,6 @@ I (4156) example: connected to ap SSID:mySSID password:myPASSWORD
 ##### 1. Add header file.
 
 ```c++
-#include "mqtt_client.h"
 #include "wsiotsdk.h"
 ```
 
