@@ -150,7 +150,9 @@ fn handle_pk(rid: i32) -> Result<()> {
 
 ##### Event Rounting Settings
 
-![event_rounting](img\event_rounting.png)
+<p>
+  <img src="img\event_rounting.png" alt="event_rounting">
+</p>
 
 ##### For more details about w3bstream studio, please check the following links:
 
