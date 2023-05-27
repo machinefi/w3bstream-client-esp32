@@ -18,7 +18,9 @@ For more information about w3bstream, please refer to the following document:
 
 ##### After login：
 
-![devnet_home](img\devnet_home.png)
+<p>
+  <img src="img\devnet_home.png" alt="devnet_home">
+</p>
 
 
 
@@ -26,7 +28,9 @@ For more information about w3bstream, please refer to the following document:
 
 ##### 1. Please click the Create a project now button to start creating a new project.
 
-![devnet_new_prj](img\devnet_new_prj.png)
+<p>
+  <img src="img\devnet_new_prj.png" alt="devnet_new_prj">
+</p>
 
 ##### 2. Enter a project name in the Name text box.
 
@@ -34,37 +38,47 @@ For more information about w3bstream, please refer to the following document:
 
 You can choose either **Hello World** or **Code Upload**. (Here we choose Hello World as a demo)
 
-![devnet_new_prj_2](img\devnet_new_prj_2.png)
+<p>
+  <img src="img\devnet_new_prj_2.png" alt="devnet_new_prj_2">
+</p>
 
 When the settings are complete, click the Submit button. We now have a project named "esp32_hello".
 
-![devnet_home_prj](img\devnet_home_prj.png)
-
+<p>
+  <img src="img\devnet_home_prj.png" alt="devnet_home_prj">
+</p>
 
 
 ## Add a device and get the Token
 
-![devnet_home_prj](img\devnet_home_prj.png)
-
 ##### 1. Click on the project name (esp32_hello) to enter this project.
-
-![devnet_prj_adddev](img\devnet_prj_adddev.png)
 
 ##### 2. Please click Devices and Add Device in order.
 
-![devnet_prj_adddev_2](img\devnet_prj_adddev_2.png)
+<p>
+  <img src="img\devnet_prj_adddev.png" alt="devnet_prj_adddev">
+</p>
 
 ##### 3. Enter the Publisher Key.
 
-![devnet_prj_adddev_3](img\devnet_prj_adddev_3.png)
+<p>
+  <img src="img\devnet_prj_adddev_2.png" alt="devnet_prj_adddev_2">
+</p>
 
-**Device has been added and Token is displayed. **
+**Device has been added and Token is displayed.**
+
+<p>
+  <img src="img\devnet_prj_adddev_3.png" alt="devnet_prj_adddev_3">
+</p>
+
 
 
 
 ## Get the Topic of MQTT
 
-![devnet_prj_mqtt_topic](img\devnet_prj_mqtt_topic.png)
+<p>
+  <img src="img\devnet_prj_mqtt_topic.png" alt="devnet_prj_mqtt_topic">
+</p>
 
 **You can see the MQTT Publish Topic after clicking on Triggers on the left**
 
@@ -72,4 +86,6 @@ When the settings are complete, click the Submit button. We now have a project n
 
 ## View WASM log output
 
-![devnet_log](img\devnet_log.png)
+<p>
+  <img src="img\devnet_log.png" alt="devnet_log">
+</p>
