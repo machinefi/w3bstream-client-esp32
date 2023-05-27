@@ -16,9 +16,8 @@ Please refer to the following documentation for setting up the environment for E
 
 ## Start a Project
 
-- Select the examples -- wifi -- getting_started -- station example in the IDF SDK as our starting project.
-- Create the **components** directory in the root directory.
-- Copy the WSIoTSDK library to the components directory.
+- Create the **components** directory in the root directory of your project.
+- Clone the component into the **components** directory of your project, or add it as a submodule.
 
 The project structure is as follows:
 <p>
@@ -149,9 +148,9 @@ Fill the **token** and **mqtt topic** obtained through **w3bstream studio** into
 ##### 5. The project examples provide several examples for uploading user data to w3bstream:
 
 ```c
-int iotex_dev_access_data_with_sign_upload_example(unsigned char *pubkey, int pubkey_len);
-int iotex_dev_access_data_with_pubky_upload_example(unsigned char *pubkey, int pubkey_len);
-int iotex_dev_access_data_with_protobuf_upload_example(void);
+void iotex_devnet_upload_data_example_json(void);
+void iotex_devnet_upload_data_example_pb(void);
+void iotex_devnet_upload_data_example_raw(void);
 ```
 
 ##### 6. The user does not need to care about the details of the device's data interaction with w3bstream.
