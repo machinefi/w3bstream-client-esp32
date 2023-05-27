@@ -21,8 +21,9 @@ Please refer to the following documentation for setting up the environment for E
 - Copy the WSIoTSDK library to the components directory.
 
 The project structure is as follows:
-
-![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/project.png)
+<p>
+  <img src="doc/img/project.png" alt="New project wizard" height="300">
+</p>
 
 
 
@@ -34,17 +35,25 @@ The project structure is as follows:
 idf.py menuconfig
 ```
 
-![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/menuconfig_1.png)
+<p>
+  <img src="doc/img/menuconfig_1.png" alt="Menuconfig">
+</p>
 
 ##### 2. Or double-click on the sdkconfig file in the Project Explorer on the left side of eclipse.
 
-![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/sdkconfig.png)
+<p>
+  <img src="doc/img/sdkconfig.png" alt="sdkconfig">
+</p>
 
 ##### 3. Select Example Configuration and enter your Wifi SSID and PASSWORD.
 
-![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/menuconfig_wifi_config.png)
+<p>
+  <img src="doc/img/menuconfig_wifi_config.png" alt="wifi_config">
+</p>
 
-![image](https://github.com/machinefi/w3bstream-client-esp32/blob/main/doc/img/sdkconfig_wifi_config.png)
+<p>
+  <img src="doc/img/sdkconfig_wifi_config.png" alt="wifi_config">
+</p>
 
 ## Test your project
 
@@ -131,7 +140,7 @@ void app_main(void) {
 Fill the **token** and **mqtt topic** obtained through **w3bstream studio** into the **iotex_dev_access_config.h** file:
 
 ```c
-#define IOTEX_TOKEN_DEFAULT				"eyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+#define IOTEX_TOKEN_DEFAULT		        "eyxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 #define IOTEX_MQTT_TOPIC_DEFAULT		"eth_xxxxxxxxxxxxxxxxxxx_esp32_hello"
 ```
 
