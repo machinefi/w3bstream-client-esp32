@@ -1,4 +1,4 @@
-# ESP32S3 Devnet Development Notes -- Eclipse Edition
+# Web3 Component for ESP32
 
 
 
@@ -95,7 +95,7 @@ I (4156) example: connected to ap SSID:mySSID password:myPASSWORD
 
 ##### You need to create the project and device from the w3bstream studio page and get the token and mqtt topic, for more detailed instructions, please see the following documentation:
 
-《 How to create a w3bstream studio project 》
+[How to create a w3bstream studio project](./doc/How_to_create_a_w3bstream_studio_project.md)
 
 
 
@@ -163,4 +163,4 @@ void iotex_devnet_upload_data_example_raw(void);
 
 ##### For more information about Iotex WSIoTSDK, please refer to the following document:
 
-《WSIoTSDK User Manual》
+[WSIoTSDK User Manual](./doc/WSIoTSDK_User_Manual.md)
