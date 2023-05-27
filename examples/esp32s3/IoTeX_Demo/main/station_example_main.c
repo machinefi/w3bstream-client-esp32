@@ -36,6 +36,8 @@
 #include "mqtt_client.h"
 #include "wsiotsdk.h"
 
+#include "ProtoBuf/user_data.pb.h"
+
 /* The examples use WiFi configuration that you can set via project configuration menu
 
    If you'd rather not, just change the below entries to strings with
@@ -655,16 +657,56 @@ void iotex_import_key_example(void)
 
 }
 
+typedef struct __packed user_data
+{
+   int i;
+   float f;
+   bool b;
+}user_data_t;
+
+void iotex_devnet_upload_data_example_raw(void) {
+
+	user_data_t user_data;
+	unsigned int len = sizeof(user_data);
+
+	user_data.i = 64;
+	user_data.f = 128.128;
+	user_data.b = true;
+
+	iotex_dev_access_data_upload_with_userdate((void *)&user_data, len, IOTEX_USER_DATA_TYPE_RAW);
+}
+
 void iotex_devnet_upload_data_example_json(void) {
 
 	cJSON *user_data = cJSON_CreateObject();
 
-	cJSON_AddNumberToObject(user_data, "sensor1", 10);
-	cJSON_AddNumberToObject(user_data, "sensor2", 5.5);
+	cJSON_AddNumberToObject(user_data, "sensor_1", 10);
+	cJSON_AddNumberToObject(user_data, "sensor_2", 5.5);
+	cJSON_AddBoolToObject(user_data, "sensor_3", true);
 
-	iotex_dev_access_data_upload_with_json_payload(user_data);
+	iotex_dev_access_data_upload_with_userdate(user_data, 1, IOTEX_USER_DATA_TYPE_JSON);
 }
 
+void iotex_devnet_upload_data_example_pb(void) {
+
+	unsigned char sensor_buf[user_data_size] = {0};
+	pb_ostream_t ostream_sensor = {0};
+	user_data sensor = user_data_init_zero;
+
+	sensor.sensor_1 = 32;
+	sensor.sensor_2 = 64.128;
+	sensor.sensor_3 = true;
+
+	ostream_sensor  = pb_ostream_from_buffer(sensor_buf, user_data_size);
+	if (!pb_encode(&ostream_sensor, user_data_fields, &sensor)) {
+		printf("pb encode [event] error in [%s]\n", PB_GET_ERROR(&ostream_sensor));
+		return;
+	}
+
+	iotex_dev_access_data_upload_with_userdate(sensor_buf, ostream_sensor.bytes_written, IOTEX_USER_DATA_TYPE_PB);
+}
+
+int flag = 1;
 extern void default_SetSeed(unsigned int seed);
 void app_main(void)
 {
@@ -722,6 +764,12 @@ void app_main(void)
     	vTaskDelay(5000 / portTICK_PERIOD_MS);
 
     	iotex_devnet_upload_data_example_json();
+
+    	vTaskDelay(5000 / portTICK_PERIOD_MS);
+   		iotex_devnet_upload_data_example_pb();
+
+    	vTaskDelay(5000 / portTICK_PERIOD_MS);
+   		iotex_devnet_upload_data_example_raw();
 
     }
 }
