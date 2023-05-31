@@ -188,7 +188,7 @@ void iotex_dev_access_loop(void) {
 	// TODO: Loop code here
 }
 
-int iotex_dev_access_data_upload_with_userdate(void *buf, size_t buf_len, enum UserData_Type type) {
+int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type) {
 
 	char sign_buf[64]  = {0};
 	unsigned int  sign_len = 0;

@@ -673,7 +673,7 @@ void iotex_devnet_upload_data_example_raw(void) {
 	user_data.f = 128.128;
 	user_data.b = true;
 
-	iotex_dev_access_data_upload_with_userdate((void *)&user_data, len, IOTEX_USER_DATA_TYPE_RAW);
+	iotex_dev_access_data_upload_with_userdata((void *)&user_data, len, IOTEX_USER_DATA_TYPE_RAW);
 }
 
 void iotex_devnet_upload_data_example_json(void) {
@@ -684,7 +684,7 @@ void iotex_devnet_upload_data_example_json(void) {
 	cJSON_AddNumberToObject(user_data, "sensor_2", 5.5);
 	cJSON_AddBoolToObject(user_data, "sensor_3", true);
 
-	iotex_dev_access_data_upload_with_userdate(user_data, 1, IOTEX_USER_DATA_TYPE_JSON);
+	iotex_dev_access_data_upload_with_userdata(user_data, 1, IOTEX_USER_DATA_TYPE_JSON);
 }
 
 void iotex_devnet_upload_data_example_pb(void) {
@@ -703,7 +703,7 @@ void iotex_devnet_upload_data_example_pb(void) {
 		return;
 	}
 
-	iotex_dev_access_data_upload_with_userdate(sensor_buf, ostream_sensor.bytes_written, IOTEX_USER_DATA_TYPE_PB);
+	iotex_dev_access_data_upload_with_userdata(sensor_buf, ostream_sensor.bytes_written, IOTEX_USER_DATA_TYPE_PB);
 }
 
 int flag = 1;

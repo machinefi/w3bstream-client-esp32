@@ -174,7 +174,7 @@ int iotex_dev_access_set_mqtt_status(enum IOTEX_MQTT_STATUS status);
 int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len);
 int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *dev_address);
 
-int iotex_dev_access_data_upload_with_userdate(void *buf, size_t buf_len, enum UserData_Type type);
+int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type);
 
 #ifdef __cplusplus
 }
