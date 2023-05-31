@@ -1,11 +1,11 @@
 | Supported Targets | ESP32 | ESP32-C2 | ESP32-C3 | ESP32-S2 | ESP32-S3 |
 | ----------------- | ----- | -------- | -------- | -------- | -------- |
 
-# Wi-Fi Station Example
+# W3bstream Devnet Example
 
-(See the README.md file in the upper level 'examples' directory for more information about examples.)
+This example shows how to use the `Web3 component for ESP` of the WSIoTSDK for connecting to W3bstream Devnet.
 
-This example shows how to use the Wi-Fi Station functionality of the Wi-Fi driver of ESP for connecting to an Access Point.
+
 
 ## How to use example
 
@@ -17,9 +17,167 @@ In the `Example Configuration` menu:
 
 * Set the Wi-Fi configuration.
     * Set `WiFi SSID`.
+    
     * Set `WiFi Password`.
+    
+      
+
+In the `iotex_dev_access_config.h` file (`..\include\application\devnet\`) :
+
+- Set the Devnet configuration.
+
+  - Set `IOTEX_TOKEN_DEFAULT`.
+
+  - Set `IOTEX_MQTT_TOPIC_DEFAULT`.	  
+
+
 
 Optional: If you need, change the other options according to your requirements.
+
+
+
+### Set the registration functions
+
+- Function Prototypes:
+
+```c
+typedef time_t (*iotex_gettime)(void);
+typedef int (*iotex_mqtt_pub)(unsigned char *topic, unsigned char *buf, unsigned int buflen, int qos);
+typedef int (*iotex_mqtt_sub)(unsigned char *topic);
+```
+
+​		**iotex_gettime**
+
+​		This function will return the number of seconds that have elapsed since January 1, 1970 A.D. UTC time was calculated from 0:00:0 seconds to the current moment (i.e., January 1, 1970 00:00:00 GMT to the current moment in seconds).
+
+------
+
+​		*example:*
+
+```c
+time_t iotex_time_set_func(void) {
+    return time(NULL);
+}
+```
+
+------
+
+​		**iotex_mqtt_pub**
+
+​		Client to send a publish message to the broker.
+
+| Parameters | Note                                                         |
+| ---------- | ------------------------------------------------------------ |
+| topic      | topic string                                                 |
+| buf        | payload string (set to NULL, sending empty payload message)  |
+| buflen     | data length, if set to 0, length is calculated from payload string |
+| qos        | QoS of publish message                                       |
+
+------
+
+​		*example：*
+
+```c
+int iotex_mqtt_pubscription(unsigned char *topic, unsigned char *buf, unsigned int buflen, int qos) {
+	return esp_mqtt_client_publish(mqtt_client, (const char *)topic, (const char *)buf, buflen, 1, 0);
+}
+```
+
+------
+
+​		
+
+​		**iotex_mqtt_sub**
+
+​		Subscribe the client to defined topic.
+
+| Parameters | Note         |
+| ---------- | ------------ |
+| topic      | topic string |
+
+------
+
+​		*example:*
+
+```c
+int iotex_mqtt_subscription(unsigned char *topic) {
+    return esp_mqtt_client_subscribe(mqtt_client, (const char *)topic, 0);
+}
+```
+
+------
+
+
+
+- Register function prototype：
+
+```c
+int iotex_wsiotsdk_init(iotex_gettime get_time_func, iotex_mqtt_pub mqtt_pub, iotex_mqtt_sub mqtt_sub);
+```
+
+------
+
+​		*example:*
+
+```c
+void app_main(void) {
+
+	// ......
+
+	iotex_wsiotsdk_init(iotex_time_set_func, iotex_mqtt_pubscription, iotex_mqtt_subscription);
+
+	// ......
+
+}
+```
+
+------
+
+
+
+### **User Data Upload**
+
+- Function Prototype:
+
+```c
+int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buflen, enum UserData_Type type);
+```
+
+​		User data upload to devnet.
+
+| Parameters | Notes                |
+| ---------- | -------------------- |
+| buf        | Point to user data.  |
+| buflen     | Length of user data. |
+| type       | User data type.      |
+
+```c
+enum UserData_Type {
+    IOTEX_USER_DATA_TYPE_JSON,
+	IOTEX_USER_DATA_TYPE_PB,
+	IOTEX_USER_DATA_TYPE_RAW
+};
+```
+
+
+
+------
+
+​		*example:*
+
+​		Three examples are provided to show how to  report user data in `Json`, `ProtoBuf` and `Rawdata` formats .
+
+```c
+void iotex_devnet_upload_data_example_raw(void);
+
+void iotex_devnet_upload_data_example_json(void);
+
+void iotex_devnet_upload_data_example_pb(void);
+```
+
+------
+
+
 
 ### Build and Flash
 
@@ -118,9 +276,7 @@ I (10299) wifi station: Failed to connect to SSID:myssid, password:mypassword
 
 ## Notes
 
-- In this example, the data upload format uses Protobuf encoding, which is required by the w3bstream devnet specification. **WSIoTSDK** has taken care of all the details.
-- The Payload is encoded in Json format, but the WSIoTSDK does not restrict this.
-- For more support on Payload encoding, please refer to other examples.
+
 
 ## Troubleshooting
 
