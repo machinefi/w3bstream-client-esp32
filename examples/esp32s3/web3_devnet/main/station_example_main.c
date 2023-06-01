@@ -312,7 +312,8 @@ static void mqtt_app_start(void)
 		.broker.address.port      = 1883,
 		.broker.address.transport = MQTT_TRANSPORT_OVER_TCP,
 #else
-		.broker.address.uri = "mqtt://devnet-staging.w3bstream.com:1883",
+//		.broker.address.uri = "mqtt://devnet-staging.w3bstream.com:1883",
+		.broker.address.uri = iotex_dev_access_get_mqtt_connect_addr(),
 #endif
 #endif
 	};

@@ -338,4 +338,14 @@ int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *de
 	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 }
 
+char *iotex_dev_access_get_mqtt_connect_addr(void) {
+
+#ifdef IOTEX_WEBSTREAM_STUDIO_ADDRESS;
+	return IOTEX_WEBSTREAM_STUDIO_ADDRESS;
+#else
+	return NULL;
+#endif
+
+}
+
 
