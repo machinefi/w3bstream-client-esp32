@@ -20,6 +20,7 @@ int iotex_dev_access_init(void)
 
 	memset(dev_ctx, 0, sizeof(iotex_dev_ctx_t));
 	memcpy(dev_ctx->mqtt_ctx.topic[0], IOTEX_MQTT_TOPIC_DEFAULT, strlen(IOTEX_MQTT_TOPIC_DEFAULT));
+	memcpy(dev_ctx->mqtt_ctx.token, IOTEX_TOKEN_DEFAULT, strlen(IOTEX_TOKEN_DEFAULT));
 
 	dev_ctx->inited = 1;
 
@@ -43,6 +44,25 @@ int iotex_dev_access_set_mqtt_topic(const char *topic, int topic_len, int topic_
     if( dev_ctx->debug_enable ) {
         printf("Success to set mqtt topic: \n");
         printf("topic : %s\n", dev_ctx->mqtt_ctx.topic[topic_location]);
+    }
+#endif
+    return IOTEX_DEV_ACCESS_ERR_SUCCESS;
+}
+
+int iotex_dev_access_set_token(const char *token, int token_len) {
+    if( (NULL == dev_ctx) || (0 == dev_ctx->inited) )
+        return IOTEX_DEV_ACCESS_ERR_NO_INIT;
+
+    if( (NULL == token) || (token_len > IOTEX_MAX_TOKEN_SIZE) )
+        return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
+
+    memset(dev_ctx->mqtt_ctx.token, 0, IOTEX_MAX_TOKEN_SIZE);
+    memcpy(dev_ctx->mqtt_ctx.token, token, strlen(token));
+
+#ifdef IOTEX_DEBUG_ENABLE
+    if( dev_ctx->debug_enable ) {
+        printf("Success to set token: \n");
+        printf("token : %s\n", dev_ctx->mqtt_ctx.token);
     }
 #endif
     return IOTEX_DEV_ACCESS_ERR_SUCCESS;
@@ -209,7 +229,7 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 	strcpy(upload.header.event_id, IOTEX_EVENT_ID_DEFAULT);
 	strcpy(upload.header.pub_id,   IOTEX_PUB_ID_DEFAULT);
 	strcpy(upload.header.event_type, IOTEX_EVENT_TYPE_DEFAULT);
-	strcpy(upload.header.token, IOTEX_TOKEN_DEFAULT);
+	strcpy(upload.header.token, dev_ctx->mqtt_ctx.token);
 	upload.header.pub_time = IOTEX_PUB_TIME_TEST_DEFAULT;
 
  	upload.payload.type = type;
@@ -340,7 +360,7 @@ int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *de
 
 char *iotex_dev_access_get_mqtt_connect_addr(void) {
 
-#ifdef IOTEX_WEBSTREAM_STUDIO_ADDRESS;
+#ifdef IOTEX_WEBSTREAM_STUDIO_ADDRESS
 	return IOTEX_WEBSTREAM_STUDIO_ADDRESS;
 #else
 	return NULL;

@@ -21,6 +21,7 @@
 #define IOTEX_MAX_TOPIC_NUM                     1
 #define IOTEX_MAX_TOPIC_SIZE                    64
 #define IOTEX_MQTT_QOS                          0
+#define IOTEX_MAX_TOKEN_SIZE					160
 
 #define IOTEX_DEV_ACCESS_ERR_SUCCESS                0x00
 #define IOTEX_DEV_ACCESS_ERR_NO_INIT               	-0x01
@@ -91,32 +92,6 @@ typedef int (*iotex_sign_message)(const uint8_t * input, size_t input_length, ui
 typedef int (*iotex_verify_message)(const uint8_t * input, size_t input_length, const uint8_t * signature, size_t signature_length );
 #endif   
 
-#if 0
-typedef struct iotex_sensor_data { 
-
-    uint32_t snr; 
-    uint32_t vbat; 
-
-    int32_t latitude; 
-    int32_t longitude; 
-
-    uint32_t gasResistance; 
-    
-    int32_t temperature; 
-    int32_t temperature2; 
-    
-    uint32_t pressure; 
-    uint32_t humidity; 
-    uint32_t light; 
-    
-    int32_t gyroscope[3]; 
-    int32_t accelerometer[3]; 
-
-    char random[17]; 
-
-} iotex_sensor_data_t;
-#endif
-
 enum IOTEX_MQTT_STATUS {
 	IOTEX_MQTT_DISCONNECTED,
 	IOTEX_MQTT_CONNECTED,
@@ -127,6 +102,7 @@ typedef struct iotex_mqtt_ctx {
 
 	enum IOTEX_MQTT_STATUS	status;
 	char topic[IOTEX_MAX_TOPIC_NUM][IOTEX_MAX_TOPIC_SIZE];
+	char token[IOTEX_MAX_TOKEN_SIZE];
 
     iotex_mqtt_pub mqtt_pub_func;
     iotex_mqtt_sub mqtt_sub_func;
@@ -167,6 +143,7 @@ void iotex_dev_access_loop(void);
 
 void iotex_devreg_debug_enable(int enable);
 
+int iotex_dev_access_set_token(const char *token, int token_len);
 int iotex_dev_access_set_mqtt_topic(const char *topic, int topic_len, int topic_location);
 int iotex_dev_access_set_time_func(iotex_gettime get_time_func);
 int iotex_dev_access_set_mqtt_func(iotex_mqtt_pub mqtt_pub, iotex_mqtt_sub mqtt_sub);
