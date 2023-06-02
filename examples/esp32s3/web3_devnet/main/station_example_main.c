@@ -67,22 +67,24 @@
 
 
 #define KEY_BITS  256
-#define IOTEX_DEBUG_ENABLE
+//#define IOTEX_DEBUG_ENABLE
 //#define IOTEX_DEBUG_ENABLE_EXT
 
 #define IOTEX_SIGNKEY_USE_NONE			    0x00
 #define IOTEX_SIGNKEY_USE_STATIC_DATA       0x01
-#define IOTEX_SIGNKEY_USE_EEPROM            0x02
+#define IOTEX_SIGNKEY_USE_FLASH             0x02			// Not Support
 #define IOTEX_SIGNKEY_USE_PRNG              0x04
 
 #define IOTEX_SIGNKEY_USE_MODE              IOTEX_SIGNKEY_USE_STATIC_DATA
 
 #define IOTEX_SIGNKEY_ECC_MODE				PSA_ECC_FAMILY_SECP_K1
 
+#if ( IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_STATIC_DATA )
+static const uint8_t private_key[] = {0xa1, 0x73, 0x6f, 0xbf, 0x37, 0xa2, 0xfc, 0xb8, 0xfe, 0xe2, 0x02, 0xdb, 0x0c, 0x63, 0x91, 0xdf, 0xa4, 0x61, 0x86, 0x29, 0xb1, 0x86, 0xa6, 0x90, 0x65, 0x85, 0x2d, 0xfc, 0xd8, 0x8f, 0x58, 0x19};
+#endif
+
 #if ( IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_PRNG )
-
 #define IOTEX_SEED_USER_DEFINE              69834
-
 #endif
 
 /* FreeRTOS event group to signal when we are connected*/
@@ -102,21 +104,9 @@ psa_key_id_t key_id = 0;
 
 esp_mqtt_client_handle_t mqtt_client = NULL;
 
-static const uint8_t private_key[] = {0xa1, 0x73, 0x6f, 0xbf, 0x37, 0xa2, 0xfc, 0xb8, 0xfe, 0xe2, 0x02, 0xdb, 0x0c, 0x63, 0x91, 0xdf, 0xa4, 0x61, 0x86, 0x29, 0xb1, 0x86, 0xa6, 0x90, 0x65, 0x85, 0x2d, 0xfc, 0xd8, 0x8f, 0x58, 0x19};
+
 uint8_t  exported[PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(KEY_BITS)];
 uint32_t exported_len;
-/*
-static void iotex_hex2str(uint8_t *input, uint16_t input_len, char *output)
-{
-    char *hexEncode = "0123456789ABCDEF";
-    int i = 0, j = 0;
-
-    for (i = 0; i < input_len; i++) {
-        output[j++] = hexEncode[(input[i] >> 4) & 0xf];
-        output[j++] = hexEncode[(input[i]) & 0xf];
-    }
-}
-*/
 
 static void log_error_if_nonzero(const char *message, int error_code)
 {
@@ -312,7 +302,6 @@ static void mqtt_app_start(void)
 		.broker.address.port      = 1883,
 		.broker.address.transport = MQTT_TRANSPORT_OVER_TCP,
 #else
-//		.broker.address.uri = "mqtt://devnet-staging.w3bstream.com:1883",
 		.broker.address.uri = iotex_dev_access_get_mqtt_connect_addr(),
 #endif
 #endif
@@ -501,59 +490,9 @@ void iotex_import_key_example(void)
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
     psa_status_t status;
     unsigned char prikey[32] = {0};
-#if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_EEPROM)
-    unsigned int  prikey_len = 0;
-#endif
-
     char dev_address[100] = {0};
 
     uint8_t key_mode = 0;
-
-#if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_EEPROM)
-
-    EEPROM.begin(IOTEX_SIGNKEY_IN_EEPROM_BUF_SIZE);
-
-    if( iotex_check_signkey_valid_in_eeprom() ) {
-
-#ifdef IOTEX_DEBUG_ENABLE
-        Serial.printf("SignKey is valid in eeprom\n");
-#endif
-        iotex_read_signkey_from_eeprom(prikey, &prikey_len);
-
-#ifdef IOTEX_DEBUG_ENABLE
-        Serial.print("Read Key [");
-        Serial.print(prikey_len);
-        Serial.print("]: ");
-        for (int i = 0; i < prikey_len; i++) {
-            Serial.printf("%02x ", prikey[i]);
-        }
-        Serial.println();
-#endif
-
-        key_mode = 1;
-
-    } else {
-
-#ifdef IOTEX_DEBUG_ENABLE
-        Serial.printf("SignKey is invalid in eeprom\n");
-#endif
-        iotex_generate_signkey(prikey, &prikey_len);
-
-#ifdef IOTEX_DEBUG_ENABLE
-        Serial.print("Generate Key [");
-        Serial.print(prikey_len);
-        Serial.print("]: ");
-        for (int i = 0; i < prikey_len; i++) {
-            Serial.printf("%02x ", prikey[i]);
-        }
-        Serial.println();
-#endif
-        iotex_write_signkey_to_eeprom(prikey, prikey_len);
-
-        key_mode = 0;
-   }
-
-#endif
 
 #if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_STATIC_DATA)
 
@@ -564,20 +503,11 @@ void iotex_import_key_example(void)
 
 #if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_PRNG)
 
+    unsigned int prikey_len = 0;
+
+extern void default_SetSeed(unsigned int seed);
     default_SetSeed(IOTEX_SEED_USER_DEFINE);
     iotex_generate_signkey(prikey, &prikey_len);
-
-    key_mode = 0;
-#endif
-
-#if 0
-    iotex_generate_signkey(prikey, &prikey_len);
-
-    printf("Generate Key [%d]:\n", prikey_len);
-    for (int i = 0; i < prikey_len; i++) {
-        printf("%02x ", prikey[i]);
-    }
-    printf("\n");
 
     key_mode = 0;
 #endif
@@ -736,21 +666,12 @@ void app_main(void)
 
     char strftime_buf[64];
 
-#if 0
-    // Set timezone to Eastern Standard Time and print local time
-    setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
-    tzset();
-    localtime_r(&now, &timeinfo);
-    strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
-    ESP_LOGI(TAG, "The current date/time in New York is: %s", strftime_buf);
-#else
     // Set timezone to China Standard Time
     setenv("TZ", "CST-8", 1);
     tzset();
     localtime_r(&now, &timeinfo);
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(TAG, "The current date/time in Shanghai is: %s", strftime_buf);
-#endif
 
     iotex_wsiotsdk_init(iotex_time_set_func, iotex_mqtt_pubscription, iotex_mqtt_subscription);
 
