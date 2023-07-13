@@ -266,50 +266,6 @@ static int get_no_padding( unsigned char *input, size_t input_len,
 }
 #endif /* IOTEX_CIPHER_MODE_WITH_PADDING */
 
-#if 0
-static void iotex_memset(void *dest, unsigned char c, size_t count)
-{
-    if( dest == NULL)
-        return;
-
-    unsigned char *p = (unsigned  char *)dest;
-    unsigned int i = 0;
-
-    while( i < count ){
-        p[i++] = c;
-    }
-}
-#endif
-
-#if 0
-static char str2Hex(char c)
-{
-    if (c >= '0' && c <= '9') {
-        return (c - '0');
-    }
-
-    if (c >= 'a' && c <= 'z') {
-        return (c - 'a' + 10);
-    }
-
-    if (c >= 'A' && c <= 'Z') {
-        return (c -'A' + 10);
-    }
-    return c;
-}
-
-static int iotex_hexStr_2_Bin(char *str, char *bin) {
-    int i,j;
-    for(i = 0,j = 0; j < (strlen(str)>>1) ; i++,j++)
-    {
-        bin[j] = (str2Hex(str[i]) <<4);
-        i++;
-        bin[j] |= str2Hex(str[i]);
-    }   
-    return j; 
-}
-#endif
-
 int32_t iotex_int_to_string(uint32_t N, char *str)
 {
     int i = 0, j = 0;
@@ -348,35 +304,35 @@ inline iotex_md_type_t iotex_md_get_type( const iotex_md_info_t *md_info )
 /****************************************************************/
 inline void iotex_md5_free( iotex_md5_context *ctx )
 {
-    // iotex_md5_init( (iotex_md5_context *)ctx );    
+    // TODO iotex_md5_init( (iotex_md5_context *)ctx );    
 }
 
 inline void iotex_md5_clone( iotex_md5_context *dst, const iotex_md5_context *src )
 {
-    // iotex_md5_clone( (iotex_md5_context *)dst, (iotex_md5_context *)src );
+    // TODO iotex_md5_clone( (iotex_md5_context *)dst, (iotex_md5_context *)src );
 }
 
 inline int iotex_md5_starts( iotex_md5_context *ctx )
 {
-    // return iotex_md5_starts_ret( (iotex_md5_context *)ctx );
+    // TODO return iotex_md5_starts_ret( (iotex_md5_context *)ctx );
 	return 0;
 }
 
 inline int iotex_md5_update( iotex_md5_context *ctx, const unsigned char *input, size_t ilen )
 {
-    // return iotex_md5_update_ret( (iotex_md5_context *)ctx, input, ilen );
+    // TODO return iotex_md5_update_ret( (iotex_md5_context *)ctx, input, ilen );
 	return 0;
 }
 
 inline int iotex_md5_finish( iotex_md5_context *ctx, unsigned char output[16] )
 {
-    // return iotex_md5_finish_ret( (iotex_md5_context *)ctx, output );
+    // TODO return iotex_md5_finish_ret( (iotex_md5_context *)ctx, output );
 	return 0;
 }
 
 inline int iotex_md5( const unsigned char *input, size_t ilen, unsigned char output[16] )
 {
-    // return iotex_md5_ret( input, ilen, output[16] );
+    // TODO return iotex_md5_ret( input, ilen, output[16] );
 	return 0;
 }
 
@@ -487,7 +443,11 @@ inline void iotex_sha256_clone( iotex_sha256_context *dst, const iotex_sha256_co
 	if (NULL == dst->sha256_ctx)
 		iotex_sha256_init(dst);
 
-    memcpy(dst, src, sizeof(struct tc_sha256_state_struct));
+    memcpy(dst, src, sizeof(iotex_sha256_context));
+    // Deep clone the sha256 context, which is dynamically allocated
+    // Otherwise, when aborting the source operation, the sha256 context of the destination will be freed.
+    dst->sha256_ctx = malloc(sizeof(struct tc_sha256_state_struct));
+    memcpy(dst->sha256_ctx, src->sha256_ctx, sizeof(struct tc_sha256_state_struct));
 #endif
 
 #if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
@@ -1070,7 +1030,7 @@ inline int iotex_cipher_reset( iotex_cipher_context_t *ctx )
 #if defined(IOTEX_GCM_C) || defined(IOTEX_CHACHAPOLY_C)
 inline int iotex_cipher_update_ad( iotex_cipher_context_t *ctx, const unsigned char *ad, size_t ad_len )
 {
-    // return iotex_cipher_update_ad( (iotex_cipher_context_t *)ctx, ad, ad_len );
+    // TODO iotex_cipher_update_ad( (iotex_cipher_context_t *)ctx, ad, ad_len );
 }
 #endif /* IOTEX_GCM_C || IOTEX_CHACHAPOLY_C */
 
@@ -1418,32 +1378,31 @@ int iotex_cipher_finish( iotex_cipher_context_t *ctx, unsigned char *output, siz
 #if defined(IOTEX_GCM_C) || defined(IOTEX_CHACHAPOLY_C)
 inline int iotex_cipher_write_tag( iotex_cipher_context_t *ctx, unsigned char *tag, size_t tag_len )
 {
-    // return iotex_cipher_write_tag( (iotex_cipher_context_t *)ctx, tag, tag_len );
+    // TODO iotex_cipher_write_tag( (iotex_cipher_context_t *)ctx, tag, tag_len );
 }
 
 inline int iotex_cipher_check_tag( iotex_cipher_context_t *ctx, const unsigned char *tag, size_t tag_len )
 {
-    // return iotex_cipher_check_tag( (iotex_cipher_context_t *)ctx, tag, tag_len );
+    // TODO iotex_cipher_check_tag( (iotex_cipher_context_t *)ctx, tag, tag_len );
 }
 #endif /* IOTEX_GCM_C || IOTEX_CHACHAPOLY_C */
 
 inline int iotex_cipher_crypt( iotex_cipher_context_t *ctx, const unsigned char *iv, size_t iv_len, const unsigned char *input, size_t ilen, unsigned char *output, size_t *olen )
 {
-   // return iotex_cipher_crypt( (iotex_cipher_context_t *)ctx,  iv, iv_len, input, ilen, output, olen );
+   // TODO iotex_cipher_crypt( (iotex_cipher_context_t *)ctx,  iv, iv_len, input, ilen, output, olen );
 	return 0;
 }
 
 #if defined(IOTEX_CIPHER_MODE_AEAD) || defined(IOTEX_NIST_KW_C)
 inline int iotex_cipher_auth_encrypt_ext( iotex_cipher_context_t *ctx, const unsigned char *iv, size_t iv_len, const unsigned char *ad, size_t ad_len, const unsigned char *input, size_t ilen, unsigned char *output, size_t output_len, size_t *olen, size_t tag_len )
 {
-    // return iotex_cipher_auth_encrypt_ext( (iotex_cipher_context_t *)ctx, iv, iv_len, ad, ad_len, input, ilen, output, output_len, olen, tag_len);
+    // TODO iotex_cipher_auth_encrypt_ext( (iotex_cipher_context_t *)ctx, iv, iv_len, ad, ad_len, input, ilen, output, output_len, olen, tag_len);
 	return 0;
-
 }
 
 inline int iotex_cipher_auth_decrypt_ext( iotex_cipher_context_t *ctx, const unsigned char *iv, size_t iv_len, const unsigned char *ad, size_t ad_len, const unsigned char *input, size_t ilen, unsigned char *output, size_t output_len, size_t *olen, size_t tag_len )
 {
-    // return iotex_cipher_auth_decrypt_ext( (iotex_cipher_context_t *)ctx, iv, iv_len, ad, ad_len, input, ilen, output, output_len, olen, tag_len );
+    // TODO iotex_cipher_auth_decrypt_ext( (iotex_cipher_context_t *)ctx, iv, iv_len, ad, ad_len, input, ilen, output, output_len, olen, tag_len );
 	return 0;
 }
 #endif
@@ -1586,26 +1545,26 @@ exit:
 #if defined(IOTEX_CIPHER_MODE_XTS)
 inline int iotex_aes_crypt_xts( iotex_aes_xts_context *ctx, int mode, size_t length, const unsigned char data_unit[16], const unsigned char *input, unsigned char *output )
 {
-    // return iotex_aes_crypt_xts( (iotex_aes_xts_context *)ctx, mode, length, data_unit, input, output );
+    // TODO iotex_aes_crypt_xts( (iotex_aes_xts_context *)ctx, mode, length, data_unit, input, output );
 }
 #endif /* IOTEX_CIPHER_MODE_XTS */
 
 #if defined(IOTEX_CIPHER_MODE_CFB)
 inline int iotex_aes_crypt_cfb128( iotex_aes_context *ctx, int mode, size_t length, size_t *iv_off, unsigned char iv[16], const unsigned char *input, unsigned char *output )
 {
-    // return iotex_aes_crypt_cfb128( (iotex_aes_context *)ctx, mode, length, iv_off, iv, input, output );
+    // TODO iotex_aes_crypt_cfb128( (iotex_aes_context *)ctx, mode, length, iv_off, iv, input, output );
 }
 
 inline int iotex_aes_crypt_cfb8( iotex_aes_context *ctx, int mode, size_t length, unsigned char iv[16], const unsigned char *input, unsigned char *output )
 {
-    // return iotex_aes_crypt_cfb8( (iotex_aes_context *)ctx, mode, length, iv, input, output );
+    // TODO iotex_aes_crypt_cfb8( (iotex_aes_context *)ctx, mode, length, iv, input, output );
 }
 #endif /*IOTEX_CIPHER_MODE_CFB */
 
 #if defined(IOTEX_CIPHER_MODE_OFB)
 int iotex_aes_crypt_ofb( iotex_aes_context *ctx, size_t length, size_t *iv_off, unsigned char iv[16], const unsigned char *input, unsigned char *output )
 {
-    // return iotex_aes_crypt_ofb( (iotex_aes_context *)ctx, length, iv_off, iv, input, output );
+    // TODO iotex_aes_crypt_ofb( (iotex_aes_context *)ctx, length, iv_off, iv, input, output );
 }
 #endif /* IOTEX_CIPHER_MODE_OFB */
 
@@ -1632,13 +1591,13 @@ inline int iotex_aes_crypt_ctr( iotex_aes_context *ctx,
 /****************************************************************/
 inline void iotex_rsa_init( iotex_rsa_context *ctx )
 {
-    // iotex_rsa_init( (iotex_rsa_context *)ctx );
+    // TODO iotex_rsa_init( (iotex_rsa_context *)ctx );
 }
 
 inline int iotex_rsa_set_padding( iotex_rsa_context *ctx, int padding,
                              iotex_md_type_t hash_id )
 {     
-    // return iotex_rsa_set_padding((iotex_rsa_context *)ctx, padding, hash_id );
+    // TODO iotex_rsa_set_padding((iotex_rsa_context *)ctx, padding, hash_id );
 	return 0;
 }
 
@@ -1647,7 +1606,7 @@ inline int iotex_rsa_import( iotex_rsa_context *ctx,
                         const iotex_mpi *P, const iotex_mpi *Q,
                         const iotex_mpi *D, const iotex_mpi *E )
 {
-    // return iotex_rsa_import( (iotex_rsa_context *)ctx, (iotex_mpi *)N, (iotex_mpi *)P, (iotex_mpi *)Q, (iotex_mpi *)D, (iotex_mpi *)E );
+    // TODO iotex_rsa_import( (iotex_rsa_context *)ctx, (iotex_mpi *)N, (iotex_mpi *)P, (iotex_mpi *)Q, (iotex_mpi *)D, (iotex_mpi *)E );
 	return 0;
 }
 
@@ -1658,13 +1617,13 @@ inline int iotex_rsa_import_raw( iotex_rsa_context *ctx,
                             unsigned char const *D, size_t D_len,
                             unsigned char const *E, size_t E_len )
 {
-    // return iotex_rsa_import_raw( (iotex_rsa_context *)ctx, N, N_len, P, P_len, Q, Q_len, D, D_len, E, E_len );
+    // TODO iotex_rsa_import_raw( (iotex_rsa_context *)ctx, N, N_len, P, P_len, Q, Q_len, D, D_len, E, E_len );
 	return 0;
 }
 
 inline int iotex_rsa_complete( iotex_rsa_context *ctx )
 {
-    // return iotex_rsa_complete( (iotex_rsa_context *)ctx );
+    // TODO iotex_rsa_complete( (iotex_rsa_context *)ctx );
 	return 0;
 }
 
@@ -1672,7 +1631,7 @@ inline int iotex_rsa_export( const iotex_rsa_context *ctx,
                         iotex_mpi *N, iotex_mpi *P, iotex_mpi *Q,
                         iotex_mpi *D, iotex_mpi *E )
 {
-    // return iotex_rsa_export( (iotex_rsa_context *)ctx,
+    // TODO iotex_rsa_export( (iotex_rsa_context *)ctx,
     //                    (iotex_mpi *)N, (iotex_mpi *)P, (iotex_mpi *)Q, (iotex_mpi *)D, (iotex_mpi *)E );
 	return 0;
 }
@@ -2090,6 +2049,20 @@ inline int iotex_ecp_calc_pub_key( psa_key_type_t type, uint8_t *key_buffer, siz
     return 0;
 }
 
+inline int iotex_psa_ecp_export_key_from_raw_data(psa_key_type_t type, const uint8_t *key_buffer, uint8_t *data, size_t *data_length )
+{
+	uECC_Curve curve = uECC_secp256r1();
+    
+    if( type == PSA_ECC_FAMILY_SECP_K1 ) {
+        curve = uECC_secp256k1();
+    }
+
+    uECC_compute_public_key(key_buffer, data, curve);
+    *data_length = 64;
+
+    return 0;
+}
+
 /****************************************************************/
 /* ECDSA */
 /****************************************************************/
@@ -2348,15 +2321,6 @@ int iotex_hmac_drbg_seed( iotex_hmac_drbg_context *ctx,
                     const unsigned char *custom,
                     size_t len )
 {
-#if 0
-    (void *)ctx;
-    (void *)md_info;
-    (void *)f_entropy;
-    (void *)p_entropy;
-    (void *)custom;
-    (void)len;
-#endif
-
     int ret = tc_hmac_prng_reseed(&iotex_hmac_prng_ctx.h, default_entroy_reseed, 32, 0, 0);
     if (TC_CRYPTO_SUCCESS != ret)
         return PSA_ERROR_INVALID_ARGUMENT;

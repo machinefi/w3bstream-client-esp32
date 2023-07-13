@@ -1272,6 +1272,8 @@ int iotex_ecp_check_pub_priv(
 int iotex_ecp_export(const iotex_ecp_keypair *key, iotex_ecp_group *grp,
                        iotex_mpi *d, iotex_ecp_point *Q);
 
+int iotex_psa_ecp_export_key_from_raw_data(psa_key_type_t type, const uint8_t *key_buffer, uint8_t *data, size_t *data_length );                       
+
 #if defined(IOTEX_SELF_TEST)
 
 /**

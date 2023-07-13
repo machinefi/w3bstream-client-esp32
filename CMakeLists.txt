@@ -24,6 +24,10 @@ idf_component_register(SRCS "wsiotsdk.c"
 							"psa_layer/psa_crypto_porting.c"
 							"psa_layer/psa_crypto_slot_management.c"
 							"psa_layer/psa_crypto.c"
+							"psa_layer/psa_crypto_storage.c"
+							"psa_layer/psa_its_file.c"
+							"psa_layer/psa_its_flash.c"
+							"psa_layer/psa_its_nvs.c"
 #							"psa_layer/acc/acc_driver_hash.c"
 #							"psa_layer/acc/acc_driver_cipher.c"
 #							"psa_layer/acc/acc_driver_rsa.c"
@@ -40,8 +44,12 @@ idf_component_register(SRCS "wsiotsdk.c"
 							"application/devnet/ProtoBuf/pb_decode.c"
 							"application/devnet/ProtoBuf/pb_encode.c"
 							"application/devnet/base64/base64.c"
-                    INCLUDE_DIRS "include" "include/application/devnet" "include/backends"
+							"hal/flash/flash_common.c"
+							"hal/flash/soc/esp32/flash.c"
+							"hal/nvs/nvs_common.c"
+							"hal/nvs/soc/esp32/nvs_esp32.c"
+                    INCLUDE_DIRS "include" "include/application/devnet" "include/backends" "$ENV{IDF_PATH}components/nvs_flash/include" "$ENV{IDF_PATH}components/esp_partition/include"
                     REQUIRES mbedtls)
-                    
+
 target_compile_options(${COMPONENT_LIB} PRIVATE "-Wno-format")                    
 
