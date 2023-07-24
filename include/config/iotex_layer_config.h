@@ -2699,7 +2699,7 @@
  *           either IOTEX_PSA_ITS_FILE_C or a native implementation of
  *           the PSA ITS interface
  */
-//#define IOTEX_PSA_CRYPTO_STORAGE_C
+#define IOTEX_PSA_CRYPTO_STORAGE_C
 
 /**
  * \def IOTEX_PSA_ITS_FILE_C
@@ -2712,6 +2712,30 @@
  * Requires: IOTEX_FS_IO
  */
 //#define IOTEX_PSA_ITS_FILE_C
+
+/**
+ * \def IOTEX_PSA_ITS_FLASH_C
+ *
+ * Enable the emulation of the Platform Security Architecture
+ * Internal Trusted Storage (PSA ITS) over flash.
+ *
+ * Module:  library/psa_its_flash.c
+ *
+ * Requires: 
+ */
+//#define IOTEX_PSA_ITS_FLASH_C
+
+/**
+ * \def IOTEX_PSA_ITS_NVS_C
+ *
+ * Enable the emulation of the Platform Security Architecture
+ * Internal Trusted Storage (PSA ITS) over NVS.
+ *
+ * Module:  library/psa_its_nvs.c
+ *
+ * Requires: 
+ */
+#define IOTEX_PSA_ITS_NVS_C
 
 /**
  * \def IOTEX_RIPEMD160_C

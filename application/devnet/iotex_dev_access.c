@@ -2,11 +2,14 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "common.h"
 #include "iotex_dev_access.h"
 
 #include "psa/crypto.h"
+#include "hal/flash/flash_common.h"
+#include "hal/nvs/nvs_common.h"
 
-extern psa_key_id_t key_id;
+extern psa_key_id_t g_signkey;
 
 iotex_dev_ctx_t *dev_ctx = NULL;
 
@@ -21,6 +24,9 @@ int iotex_dev_access_init(void)
 	memset(dev_ctx, 0, sizeof(iotex_dev_ctx_t));
 	memcpy(dev_ctx->mqtt_ctx.topic[0], IOTEX_MQTT_TOPIC_DEFAULT, strlen(IOTEX_MQTT_TOPIC_DEFAULT));
 	memcpy(dev_ctx->mqtt_ctx.token, IOTEX_TOKEN_DEFAULT, strlen(IOTEX_TOKEN_DEFAULT));
+
+//	iotex_hal_flash_drv_init();
+	iotex_hal_nvs_drv_init();
 
 	dev_ctx->inited = 1;
 
@@ -139,65 +145,11 @@ static int iotex_dev_access_send_data(unsigned char *buf, unsigned int buflen) {
 }
 
 int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len) {
-
-//    const cJSON *status   = NULL;
-//    const cJSON *proposer = NULL;
-
     if( NULL == dev_ctx || 0 == dev_ctx->inited )
         return IOTEX_DEV_ACCESS_ERR_NO_INIT;
 
     if( topic == NULL || payload == NULL || len == 0)
         return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
-
-#if 0
-    cJSON *monitor_json = cJSON_Parse((const char *)payload);
-    if (monitor_json == NULL)
-    {
-#ifdef IOTEX_DEBUG_ENABLE
-        const char *error_ptr = cJSON_GetErrorPtr();
-        if (error_ptr != NULL) {
-            printf("Error before: %s\n", error_ptr);
-        }
-#endif
-
-        return IOTEX_DEV_ACCESS_ERR_JSON_FAIL;
-    }
-
-    status = cJSON_GetObjectItemCaseSensitive(monitor_json, "status");
-    if (!cJSON_IsNumber(status)) {
-		status = 0;
-		return IOTEX_DEV_ACCESS_ERR_JSON_FAIL;
-    }
-
-    dev_ctx->status = status->valueint;
-
-    switch (dev_ctx->status)
-    {
-        case 0:
-            /* code */
-            break;
-        case 1:
-
-            proposer = cJSON_GetObjectItemCaseSensitive(monitor_json, "proposer");
-            if (cJSON_IsString(proposer) && (proposer->valuestring != NULL)) {
-                memcpy(dev_ctx->crypto_ctx.wallet_addr, proposer->valuestring, strlen(proposer->valuestring));
-#ifdef IOTEX_DEBUG_ENABLE
-                printf("Wallet Addr %s\n", dev_ctx->crypto_ctx.wallet_addr);
-#endif
-            }
-
-            break;
-        case 2:
-
-            printf("Dev register success\n");
-
-            break;
-        default:
-            break;
-    }
-
-    cJSON_Delete(monitor_json);
-#endif
 
     return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 
@@ -267,7 +219,7 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
  			return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
  	}
 
- 	psa_sign_message( key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256), (const uint8_t *)message, message_len, (uint8_t *)sign_buf, 64, &sign_len);
+ 	psa_sign_message( g_signkey, PSA_ALG_ECDSA(PSA_ALG_SHA_256), (const uint8_t *)message, message_len, (uint8_t *)sign_buf, 64, &sign_len);
 
  	upload.has_payload = true;
  	upload.payload.sign.size = sign_len;
@@ -358,12 +310,32 @@ int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *de
 	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
 }
 
-char *iotex_dev_access_get_mqtt_connect_addr(void) {
+char *iotex_dev_access_get_mqtt_connect_addr_in_url(void) {
+
+#ifdef IOTEX_WEBSTREAM_STUDIO_URL
+	return IOTEX_WEBSTREAM_STUDIO_URL;
+#else
+	return NULL;
+#endif
+
+}
+
+char *iotex_dev_access_get_mqtt_connect_addr_in_format(void) {
 
 #ifdef IOTEX_WEBSTREAM_STUDIO_ADDRESS
 	return IOTEX_WEBSTREAM_STUDIO_ADDRESS;
 #else
 	return NULL;
+#endif
+
+}
+
+int iotex_dev_access_get_mqtt_connect_port(void) {
+
+#ifdef IOTEX_WEBSTREAM_STUDIO_PORT
+	return atoi(IOTEX_WEBSTREAM_STUDIO_PORT);
+#else
+	return 0;
 #endif
 
 }

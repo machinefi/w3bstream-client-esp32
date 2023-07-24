@@ -61,7 +61,7 @@
 #define IOTEX_MQTT_SUB_TOPIC_DEFAULT	IOTEX_MQTT_TOPIC_DEFAULT "/" IOTEX_PUB_ID_DEFAULT
 
 #define IOTEX_WEBSTREAM_STUDIO_COMMUNICATE_TYPE		"mqtt"
-#define IOTEX_WEBSTREAM_STUDIO_URL					"devnet-prod.w3bstream.com"
+#define IOTEX_WEBSTREAM_STUDIO_URL					"devnet-staging-mqtt.w3bstream.com"
 #define IOTEX_WEBSTREAM_STUDIO_PORT					"1883"
 #define IOTEX_WEBSTREAM_STUDIO_ADDRESS				IOTEX_WEBSTREAM_STUDIO_COMMUNICATE_TYPE "://" IOTEX_WEBSTREAM_STUDIO_URL ":" IOTEX_WEBSTREAM_STUDIO_PORT
 
@@ -157,7 +157,9 @@ int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len);
 int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *dev_address);
 
 int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type);
-char *iotex_dev_access_get_mqtt_connect_addr(void);
+char *iotex_dev_access_get_mqtt_connect_addr_in_format(void);
+char *iotex_dev_access_get_mqtt_connect_addr_in_url(void);
+int iotex_dev_access_get_mqtt_connect_port(void);
 
 #ifdef __cplusplus
 }

@@ -607,6 +607,11 @@
 #error "IOTEX_PSA_ITS_FILE_C defined, but not all prerequisites"
 #endif
 
+#if defined(IOTEX_PSA_ITS_FILE_C) && \
+    defined(IOTEX_PSA_ITS_FLASH_C)
+#error "IOTEX_PSA_ITS_FILE_C is not compatible with IOTEX_PSA_ITS_FLASH_C"
+#endif
+
 #if defined(IOTEX_RSA_C) && ( !defined(IOTEX_BIGNUM_C) ||         \
     !defined(IOTEX_OID_C) )
 #error "IOTEX_RSA_C defined, but not all prerequisites"

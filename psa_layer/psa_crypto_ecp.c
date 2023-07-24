@@ -272,12 +272,12 @@ psa_status_t iotex_psa_ecp_export_public_key(
     uint8_t *data, size_t data_size, size_t *data_length )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))     
     iotex_ecp_keypair *ecp = NULL;
 
     status = iotex_psa_ecp_load_representation(
         attributes->core.type, attributes->core.bits,
         key_buffer, key_buffer_size, &ecp );
-    
     if( status != PSA_SUCCESS )
         return( status );
 
@@ -285,10 +285,12 @@ psa_status_t iotex_psa_ecp_export_public_key(
                  PSA_KEY_TYPE_ECC_PUBLIC_KEY(
                      PSA_KEY_TYPE_ECC_GET_FAMILY( attributes->core.type ) ),
                  ecp, data, data_size, data_length );
-
     iotex_ecp_keypair_free( ecp );
     iotex_free( ecp );
 
+#else
+    status = iotex_psa_ecp_export_key_from_raw_data( PSA_KEY_TYPE_ECC_GET_FAMILY(attributes->core.type), key_buffer, data, data_length );
+#endif    
     return( status );
 }
 #endif /* defined(IOTEX_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR) ||
