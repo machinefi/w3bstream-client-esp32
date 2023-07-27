@@ -22,11 +22,16 @@ int iotex_dev_access_init(void)
 		return IOTEX_DEV_ACCESS_ERR_ALLOCATE_FAIL;
 
 	memset(dev_ctx, 0, sizeof(iotex_dev_ctx_t));
-	memcpy(dev_ctx->mqtt_ctx.topic[0], IOTEX_MQTT_TOPIC_DEFAULT, strlen(IOTEX_MQTT_TOPIC_DEFAULT));
-	memcpy(dev_ctx->mqtt_ctx.token, IOTEX_TOKEN_DEFAULT, strlen(IOTEX_TOKEN_DEFAULT));
+	memcpy(dev_ctx->mqtt_ctx.topic[0], CONFIG_APP_DEVNET_ACCESS_STUDIO_TOPIC, strlen(CONFIG_APP_DEVNET_ACCESS_STUDIO_TOPIC));
+	memcpy(dev_ctx->mqtt_ctx.token, CONFIG_APP_DEVNET_ACCESS_STUDIO_TOKEN, strlen(CONFIG_APP_DEVNET_ACCESS_STUDIO_TOKEN));   
 
-//	iotex_hal_flash_drv_init();
+#ifdef CONFIG_PSA_ITS_FLASH_C
+	iotex_hal_flash_drv_init();
+#endif
+
+#ifdef CONFIG_PSA_ITS_NVS_C
 	iotex_hal_nvs_drv_init();
+#endif
 
 	dev_ctx->inited = 1;
 

@@ -1176,7 +1176,7 @@ int iotex_ecp_gen_keypair( iotex_ecp_group *grp, iotex_mpi *d,
  * \return          An \c IOTEX_ERR_ECP_XXX or \c IOTEX_MPI_XXX error code
  *                  on failure.
  */
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
 int iotex_ecp_gen_key( iotex_ecp_group_id grp_id, iotex_ecp_keypair *key,
                          int (*f_rng)(void *, unsigned char *, size_t),
                          void *p_rng );
