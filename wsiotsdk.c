@@ -2,7 +2,7 @@
 #include "wsiotsdk.h"
 
 psa_key_id_t g_signkey = 1;
-static uint8_t exported[PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256)];
+static uint8_t exported[PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256) + 1];
 
 static void iotex_export_public_key(void) {
 
@@ -10,7 +10,8 @@ static void iotex_export_public_key(void) {
     size_t exported_length = 0;
     psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
 
-    status = psa_export_public_key( g_signkey, exported, sizeof(exported), &exported_length );
+    exported[0] = 0x4;
+    status = psa_export_public_key( g_signkey, (uint8_t *)exported + 1, sizeof(exported) - 1, &exported_length );
     if( status != PSA_SUCCESS ) {
 
         printf("Generate a pair key...\n");
@@ -29,11 +30,11 @@ static void iotex_export_public_key(void) {
             printf("Failed to generate a pairkey %d\n", status);
         }
 
-        psa_export_public_key( g_signkey, exported, sizeof(exported), &exported_length );
+        psa_export_public_key( g_signkey, (uint8_t *)exported + 1, sizeof(exported) - 1, &exported_length );
     }
 
     printf("export key :\n");
-    for (int i = 0; i < 64; i++)
+    for (int i = 0; i < exported_length + 1; i++)
         printf("%.2x ", exported[i]);
     printf("\n");
 }
@@ -71,6 +72,11 @@ uint8_t * iotex_wsiotsdk_init(iotex_gettime get_time_func, iotex_mqtt_pub mqtt_p
 #endif
 
 	return (uint8_t *)exported;
+}
+
+uint8_t * iotex_wsiotsdk_get_public_key(void) {
+
+    return (uint8_t *)exported;
 }
 
 
