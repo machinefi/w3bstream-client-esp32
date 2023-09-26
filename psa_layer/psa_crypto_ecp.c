@@ -167,7 +167,7 @@ psa_status_t iotex_psa_ecp_import_key(
     uint8_t *key_buffer, size_t key_buffer_size,
     size_t *key_buffer_length, size_t *bits )
 {
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
     psa_status_t status;
 
     iotex_ecp_keypair *ecp = NULL;
@@ -272,7 +272,7 @@ psa_status_t iotex_psa_ecp_export_public_key(
     uint8_t *data, size_t data_size, size_t *data_length )
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))     
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS     
     iotex_ecp_keypair *ecp = NULL;
 
     status = iotex_psa_ecp_load_representation(
@@ -303,7 +303,7 @@ psa_status_t iotex_psa_ecp_generate_key(
 {
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))    
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS    
     int ret = IOTEX_ERR_ERROR_CORRUPTION_DETECTED;
 
     psa_ecc_family_t curve = PSA_KEY_TYPE_ECC_GET_FAMILY(
@@ -325,7 +325,7 @@ psa_status_t iotex_psa_ecp_generate_key(
 
 #endif
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))    
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS    
     ret = iotex_ecp_gen_key( grp_id, &ecp,
                                iotex_psa_get_random,
                                IOTEX_PSA_RANDOM_STATE );
@@ -333,7 +333,7 @@ psa_status_t iotex_psa_ecp_generate_key(
     status = iotex_ecp_gen_key( PSA_KEY_TYPE_ECC_GET_FAMILY(attributes->core.type), key_buffer, key_buffer_size );
 #endif                               
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))            
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS            
     if( ret != 0 )
     {
         iotex_ecp_keypair_free( &ecp );
@@ -341,7 +341,7 @@ psa_status_t iotex_psa_ecp_generate_key(
     }
 #endif        
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))            
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS            
     status = iotex_to_psa_error(
         iotex_ecp_write_key( &ecp, key_buffer, key_buffer_size ) );
 
@@ -368,7 +368,7 @@ psa_status_t iotex_psa_ecdsa_sign_hash(
     uint8_t *signature, size_t signature_size, size_t *signature_length )
 {
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 
     iotex_ecp_keypair *ecp = NULL;
@@ -454,7 +454,7 @@ psa_status_t iotex_psa_ecdsa_verify_hash(
     const uint8_t *signature, size_t signature_length )
 {
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))    
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS    
 
 	psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
 

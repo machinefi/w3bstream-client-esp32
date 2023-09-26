@@ -26,7 +26,7 @@ extern "C" {
  */
 typedef struct iotex_sha256_context
 {
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
     uint32_t total[2];          /*!< The number of Bytes processed.  */
     uint32_t state[8];          /*!< The intermediate digest state.  */
     unsigned char buffer[64];   /*!< The data block being processed. */

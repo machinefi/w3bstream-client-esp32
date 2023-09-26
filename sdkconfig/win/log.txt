@@ -1,0 +1,4 @@
+D:\WorkSpace\Espressif\w3bstream-client-esp32\application\devnet\Kconfig
+D:\WorkSpace\Espressif\w3bstream-client-esp32\hal\Kconfig
+D:\WorkSpace\Espressif\w3bstream-client-esp32\psa_layer\Kconfig
+D:\WorkSpace\Espressif\w3bstream-client-esp32\sdkconfig\Kconfig

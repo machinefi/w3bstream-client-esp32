@@ -137,7 +137,7 @@ int iotex_ecdsa_can_do( iotex_ecp_group_id gid );
  *                  or \c IOTEX_MPI_XXX error code on failure.
  */
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
 int iotex_ecdsa_sign( iotex_ecp_group *grp, iotex_mpi *r, iotex_mpi *s,
                 const iotex_mpi *d, const unsigned char *buf, size_t blen,
                 int (*f_rng)(void *, unsigned char *, size_t), void *p_rng );
@@ -228,7 +228,7 @@ int iotex_ecdsa_sign_det_ext( iotex_ecp_group *grp, iotex_mpi *r,
  *                  error code on failure for any other reason.
  */
 
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
 int iotex_ecdsa_verify( iotex_ecp_group *grp,
                           const unsigned char *buf, size_t blen,
                           const iotex_ecp_point *Q, const iotex_mpi *r,

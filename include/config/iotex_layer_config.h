@@ -1,15 +1,13 @@
+#include "autoconfig.h"
 /**
  * \file iotex_layer_config.h
  */
 
-/**
- * This is an optional version symbol that enables compatibility handling of
- * config files.
- *
- * It is equal to the #IOTEX_VERSION_NUMBER of the Mbed TLS version that
- * introduced the config format we want to be compatible with.
- */
-//#define IOTEX_CONFIG_VERSION 0x03000000
+#ifdef CONFIG_GENERIC_SDK_VERSION
+#define IOTEX_CONFIG_VERSION GENERIC_SDK_VERSION
+#else
+#define IOTEX_CONFIG_VERSION 0x001000000
+#endif
 
 /**
  * \name SECTION: System support
@@ -18,227 +16,73 @@
  * \{
  */
 
-/**
- * \def IOTEX_HAVE_ASM
- *
- * The compiler has support for asm().
- *
- * Requires support for asm() in compiler.
- *
- * Used in:
- *      library/aria.c
- *      library/bn_mul.h
- *
- * Required by:
- *      IOTEX_AESNI_C
- *      IOTEX_PADLOCK_C
- *
- * Comment to disable the use of assembly code.
- */
+#ifdef CONFIG_SYS_HAVE_ASM
 #define IOTEX_HAVE_ASM
+#endif
 
-/**
- * \def IOTEX_NO_UDBL_DIVISION
- *
- * The platform lacks support for double-width integer division (64-bit
- * division on a 32-bit platform, 128-bit division on a 64-bit platform).
- *
- * Used in:
- *      include/mbedtls/bignum.h
- *      library/bignum.c
- *
- * The bignum code uses double-width division to speed up some operations.
- * Double-width division is often implemented in software that needs to
- * be linked with the program. The presence of a double-width integer
- * type is usually detected automatically through preprocessor macros,
- * but the automatic detection cannot know whether the code needs to
- * and can be linked with an implementation of division for that type.
- * By default division is assumed to be usable if the type is present.
- * Uncomment this option to prevent the use of double-width division.
- *
- * Note that division for the native integer type is always required.
- * Furthermore, a 64-bit type is always required even on a 32-bit
- * platform, but it need not support multiplication or division. In some
- * cases it is also desirable to disable some double-width operations. For
- * example, if double-width division is implemented in software, disabling
- * it can reduce code size in some embedded targets.
- */
-//#define IOTEX_NO_UDBL_DIVISION
+#ifdef CONFIG_SYS_NO_UDBL_DIVISION
+#define IOTEX_NO_UDBL_DIVISION
+#endif
 
-/**
- * \def IOTEX_NO_64BIT_MULTIPLICATION
- *
- * The platform lacks support for 32x32 -> 64-bit multiplication.
- *
- * Used in:
- *      library/poly1305.c
- *
- * Some parts of the library may use multiplication of two unsigned 32-bit
- * operands with a 64-bit result in order to speed up computations. On some
- * platforms, this is not available in hardware and has to be implemented in
- * software, usually in a library provided by the toolchain.
- *
- * Sometimes it is not desirable to have to link to that library. This option
- * removes the dependency of that library on platforms that lack a hardware
- * 64-bit multiplier by embedding a software implementation in Mbed TLS.
- *
- * Note that depending on the compiler, this may decrease performance compared
- * to using the library function provided by the toolchain.
- */
-//#define IOTEX_NO_64BIT_MULTIPLICATION
+#ifdef CONFIG_SYS_NO_64BIT_MULTIPLICATION
+#define IOTEX_NO_64BIT_MULTIPLICATION
+#endif
 
-/**
- * \def IOTEX_HAVE_SSE2
- *
- * CPU supports SSE2 instruction set.
- *
- * Uncomment if the CPU supports SSE2 (IA-32 specific).
- */
-//#define IOTEX_HAVE_SSE2
+#ifdef CONFIG_SYS_HAVE_SSE2
+#define IOTEX_HAVE_SSE2
+#endif
 
-/**
- * \def IOTEX_HAVE_TIME
- *
- * System has time.h and time().
- * The time does not need to be correct, only time differences are used,
- * by contrast with IOTEX_HAVE_TIME_DATE
- *
- * Defining IOTEX_HAVE_TIME allows you to specify IOETX_PLATFORM_TIME_ALT,
- * IOTEX_PLATFORM_TIME_MACRO, IOEX_PLATFORM_TIME_TYPE_MACRO and
- * IOEX_PLATFORM_STD_TIME.
- *
- * Comment if your system does not support time functions.
- *
- * \note If IOTEX_TIMING_C is set - to enable the semi-portable timing
- *       interface - timing.c will include time.h on suitable platforms
- *       regardless of the setting of IOTEX_HAVE_TIME, unless
- *       IOTEX_TIMING_ALT is used. See timing.c for more information.
- */
-//#define IOTEX_HAVE_TIME
+#ifdef CONFIG_SYS_HAVE_TIME
+#define IOTEX_HAVE_TIME
+#endif
 
-/**
- * \def IOTEX_HAVE_TIME_DATE
- *
- * System has time.h, time(), and an implementation for
- * iotex_platform_gmtime_r() (see below).
- * The time needs to be correct (not necessarily very accurate, but at least
- * the date should be correct). This is used to verify the validity period of
- * X.509 certificates.
- *
- * Comment if your system does not have a correct clock.
- *
- * \note iotex_platform_gmtime_r() is an abstraction in platform_util.h that
- * behaves similarly to the gmtime_r() function from the C standard. Refer to
- * the documentation for iotex_platform_gmtime_r() for more information.
- *
- * \note It is possible to configure an implementation for
- * iotex_platform_gmtime_r() at compile-time by using the macro
- * IOTEX_PLATFORM_GMTIME_R_ALT.
- */
-//#define IOTEX_HAVE_TIME_DATE
+#ifdef CONFIG_SYS_HAVE_TIME_DATE
+#define IOTEX_HAVE_TIME_DATE
+#endif
 
-/**
- * \def IOTEX_PLATFORM_MEMORY
- *
- * Enable the memory allocation layer.
- *
- * By default mbed TLS uses the system-provided calloc() and free().
- * This allows different allocators (self-implemented or provided) to be
- * provided to the platform abstraction layer.
- *
- * Enabling IOTEX_PLATFORM_MEMORY without the
- * IOTEX_PLATFORM_{FREE,CALLOC}_MACROs will provide
- * "iotex_platform_set_calloc_free()" allowing you to set an alternative calloc() and
- * free() function pointer at runtime.
- *
- * Enabling IOTEX_PLATFORM_MEMORY and specifying
- * IOTEX_PLATFORM_{CALLOC,FREE}_MACROs will allow you to specify the
- * alternate function at compile time.
- *
- * Requires: IOTEX_PLATFORM_C
- *
- * Enable this layer to allow use of alternative memory allocators.
- */
-//#define IOTEX_PLATFORM_MEMORY
+#ifdef CONFIG_SYS_PLATFORM_MEMORY
+#define IOTEX_PLATFORM_MEMORY
+#endif
 
-/**
- * \def IOTEX_PLATFORM_NO_STD_FUNCTIONS
- *
- * Do not assign standard functions in the platform layer (e.g. calloc() to
- * IOTEX_PLATFORM_STD_CALLOC and printf() to IOTEX_PLATFORM_STD_PRINTF)
- *
- * This makes sure there are no linking errors on platforms that do not support
- * these functions. You will HAVE to provide alternatives, either at runtime
- * via the platform_set_xxx() functions or at compile time by setting
- * the IOTEX_PLATFORM_STD_XXX defines, or enabling a
- * IOTEX_PLATFORM_XXX_MACRO.
- *
- * Requires: IOTEX_PLATFORM_C
- *
- * Uncomment to prevent default assignment of standard functions in the
- * platform layer.
- */
-//#define IOTEX_PLATFORM_NO_STD_FUNCTIONS
+#ifdef CONFIG_SYS_PLATFORM_NO_STD_FUNCTIONS
+#define IOTEX_PLATFORM_NO_STD_FUNCTIONS
+#endif
 
-/**
- * \def IOTEX_PLATFORM_EXIT_ALT
- *
- * IOTEX_PLATFORM_XXX_ALT: Uncomment a macro to let mbed TLS support the
- * function in the platform abstraction layer.
- *
- * Example: In case you uncomment IOTEX_PLATFORM_PRINTF_ALT, mbed TLS will
- * provide a function "iotex_platform_set_printf()" that allows you to set an
- * alternative printf function pointer.
- *
- * All these define require IOTEX_PLATFORM_C to be defined!
- *
- * \note IOTEX_PLATFORM_SNPRINTF_ALT is required on Windows;
- * it will be enabled automatically by check_config.h
- *
- * \warning IOTEX_PLATFORM_XXX_ALT cannot be defined at the same time as
- * IOTEX_PLATFORM_XXX_MACRO!
- *
- * Requires: IOTEX_PLATFORM_TIME_ALT requires IOTEX_HAVE_TIME
- *
- * Uncomment a macro to enable alternate implementation of specific base
- * platform function
- */
-//#define IOTEX_PLATFORM_SETBUF_ALT
-//#define IOTEX_PLATFORM_EXIT_ALT
-//#define IOTEX_PLATFORM_TIME_ALT
-//#define IOTEX_PLATFORM_FPRINTF_ALT
-//#define IOTEX_PLATFORM_PRINTF_ALT
-//#define IOTEX_PLATFORM_SNPRINTF_ALT
-//#define IOTEX_PLATFORM_VSNPRINTF_ALT
-//#define IOTEX_PLATFORM_NV_SEED_ALT
-//#define IOTEX_PLATFORM_SETUP_TEARDOWN_ALT
+#ifdef CONFIG_PLATFORM_EXIT_ALT
+#define IOTEX_PLATFORM_EXIT_ALT
+#endif
 
-/**
- * \def IOTEX_DEPRECATED_WARNING
- *
- * Mark deprecated functions and features so that they generate a warning if
- * used. Functionality deprecated in one version will usually be removed in the
- * next version. You can enable this to help you prepare the transition to a
- * new major version by making sure your code is not using this functionality.
- *
- * This only works with GCC and Clang. With other compilers, you may want to
- * use IOTEX_DEPRECATED_REMOVED
- *
- * Uncomment to get warnings on using deprecated functions and features.
- */
-//#define IOTEX_DEPRECATED_WARNING
+#ifdef CONFIG_PLATFORM_SETBUF_ALT
+#define IOTEX_PLATFORM_SETBUF_ALT
+#endif
 
-/**
- * \def IOTEX_DEPRECATED_REMOVED
- *
- * Remove deprecated functions and features so that they generate an error if
- * used. Functionality deprecated in one version will usually be removed in the
- * next version. You can enable this to help you prepare the transition to a
- * new major version by making sure your code is not using this functionality.
- *
- * Uncomment to get errors on using deprecated functions and features.
- */
-//#define IOTEX_DEPRECATED_REMOVED
+#ifdef CONFIG_PLATFORM_TIME_ALT
+#define IOTEX_PLATFORM_TIME_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_FPRINTF_ALT
+#define IOTEX_PLATFORM_FPRINTF_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_PRINTF_ALT
+#define IOTEX_PLATFORM_PRINTF_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_SNPRINTF_ALT
+#define IOTEX_PLATFORM_SNPRINTF_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_VSNPRINTF_ALT
+#define IOTEX_PLATFORM_VSNPRINTF_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_NV_SEED_ALT
+#define IOTEX_PLATFORM_NV_SEED_ALT
+#endif
+
+#ifdef CONFIG_PLATFORM_SETUP_TEARDOWN_ALT
+#define IOTEX_PLATFORM_SETUP_TEARDOWN_ALT
+#endif
 
 /** \} name SECTION: System support */
 
@@ -439,176 +283,57 @@
 //#define IOTEX_ECP_RANDOMIZE_MXZ_ALT
 //#define IOTEX_ECP_NORMALIZE_MXZ_ALT
 
-/**
- * \def IOTEX_ENTROPY_HARDWARE_ALT
- *
- * Uncomment this macro to let mbed TLS use your own implementation of a
- * hardware entropy collector.
- *
- * Your function must be called \c iotex_hardware_poll(), have the same
- * prototype as declared in library/entropy_poll.h, and accept NULL as first
- * argument.
- *
- * Uncomment to use your own hardware entropy collector.
- */
-//#define IOTEX_ENTROPY_HARDWARE_ALT
+#ifdef CONFIG_PSA_ENTROPY_HARDWARE_ALT
+#define IOTEX_ENTROPY_HARDWARE_ALT
+#endif
 
-/**
- * \def IOTEX_AES_ROM_TABLES
- *
- * Use precomputed AES tables stored in ROM.
- *
- * Uncomment this macro to use precomputed AES tables stored in ROM.
- * Comment this macro to generate AES tables in RAM at runtime.
- *
- * Tradeoff: Using precomputed ROM tables reduces RAM usage by ~8kb
- * (or ~2kb if \c IOTEX_AES_FEWER_TABLES is used) and reduces the
- * initialization time before the first AES operation can be performed.
- * It comes at the cost of additional ~8kb ROM use (resp. ~2kb if \c
- * IOTEX_AES_FEWER_TABLES below is used), and potentially degraded
- * performance if ROM access is slower than RAM access.
- *
- * This option is independent of \c IOTEX_AES_FEWER_TABLES.
- *
- */
-//#define IOTEX_AES_ROM_TABLES
+#ifdef CONFIG_PSA_CIPHER_AES_ROM_TABLES
+#define IOTEX_AES_ROM_TABLES
+#endif
 
-/**
- * \def IOTEX_AES_FEWER_TABLES
- *
- * Use less ROM/RAM for AES tables.
- *
- * Uncommenting this macro omits 75% of the AES tables from
- * ROM / RAM (depending on the value of \c IOTEX_AES_ROM_TABLES)
- * by computing their values on the fly during operations
- * (the tables are entry-wise rotations of one another).
- *
- * Tradeoff: Uncommenting this reduces the RAM / ROM footprint
- * by ~6kb but at the cost of more arithmetic operations during
- * runtime. Specifically, one has to compare 4 accesses within
- * different tables to 4 accesses with additional arithmetic
- * operations within the same table. The performance gain/loss
- * depends on the system and memory details.
- *
- * This option is independent of \c IOTEX_AES_ROM_TABLES.
- *
- */
-//#define IOTEX_AES_FEWER_TABLES
+#ifdef CONFIG_PSA_CIPHER_AES_FEWER_TABLES
+#define IOTEX_AES_FEWER_TABLES
+#endif
 
-/**
- * \def IOTEX_CAMELLIA_SMALL_MEMORY
- *
- * Use less ROM for the Camellia implementation (saves about 768 bytes).
- *
- * Uncomment this macro to use less memory for Camellia.
- */
-//#define IOTEX_CAMELLIA_SMALL_MEMORY
+#ifdef CONFIG_PSA_CAMELLIA_SMALL_MEMORY
+#define IOTEX_CAMELLIA_SMALL_MEMORY
+#endif
 
-/**
- * \def IOTEX_CHECK_RETURN_WARNING
- *
- * If this macro is defined, emit a compile-time warning if application code
- * calls a function without checking its return value, but the return value
- * should generally be checked in portable applications.
- *
- * This is only supported on platforms where #IOTEX_CHECK_RETURN is
- * implemented. Otherwise this option has no effect.
- *
- * Uncomment to get warnings on using fallible functions without checking
- * their return value.
- *
- * \note  This feature is a work in progress.
- *        Warnings will be added to more functions in the future.
- *
- * \note  A few functions are considered critical, and ignoring the return
- *        value of these functions will trigger a warning even if this
- *        macro is not defined. To completely disable return value check
- *        warnings, define #IOTEX_CHECK_RETURN with an empty expansion.
- */
-//#define IOTEX_CHECK_RETURN_WARNING
-
-/**
- * \def IOTEX_CIPHER_MODE_CBC
- *
- * Enable Cipher Block Chaining mode (CBC) for symmetric ciphers.
- */
+#ifdef CONFIG_PSA_CIPHER_MODE_CBC_SUPPORT
 #define IOTEX_CIPHER_MODE_CBC
+#endif
 
-/**
- * \def IOTEX_CIPHER_MODE_CFB
- *
- * Enable Cipher Feedback mode (CFB) for symmetric ciphers.
- */
-//#define IOTEX_CIPHER_MODE_CFB
+#ifdef CONFIG_PSA_CIPHER_MODE_CFB_SUPPORT
+#define IOTEX_CIPHER_MODE_CFB
+#endif
 
-/**
- * \def IOTEX_CIPHER_MODE_CTR
- *
- * Enable Counter Block Cipher mode (CTR) for symmetric ciphers.
- */
+#ifdef CONFIG_PSA_CIPHER_MODE_CTR_SUPPORT
 #define IOTEX_CIPHER_MODE_CTR
+#endif
 
-/**
- * \def IOTEX_CIPHER_MODE_OFB
- *
- * Enable Output Feedback mode (OFB) for symmetric ciphers.
- */
-//#define IOTEX_CIPHER_MODE_OFB
+#ifdef CONFIG_PSA_CIPHER_MODE_OFB_SUPPORT
+#define IOTEX_CIPHER_MODE_OFB
+#endif
 
-/**
- * \def IOTEX_CIPHER_MODE_XTS
- *
- * Enable Xor-encrypt-xor with ciphertext stealing mode (XTS) for AES.
- */
-//#define IOTEX_CIPHER_MODE_XTS
+#ifdef CONFIG_PSA_CIPHER_MODE_XTS_SUPPORT
+#define IOTEX_CIPHER_MODE_XTS
+#endif
 
-/**
- * \def IOTEX_CIPHER_NULL_CIPHER
- *
- * Enable NULL cipher.
- * Warning: Only do so when you know what you are doing. This allows for
- * encryption or channels without any security!
- *
- * To enable the following ciphersuites:
- *      IOTEX_TLS_ECDH_ECDSA_WITH_NULL_SHA
- *      IOTEX_TLS_ECDH_RSA_WITH_NULL_SHA
- *      IOTEX_TLS_ECDHE_ECDSA_WITH_NULL_SHA
- *      IOTEX_TLS_ECDHE_RSA_WITH_NULL_SHA
- *      IOTEX_TLS_ECDHE_PSK_WITH_NULL_SHA384
- *      IOTEX_TLS_ECDHE_PSK_WITH_NULL_SHA256
- *      IOTEX_TLS_ECDHE_PSK_WITH_NULL_SHA
- *      IOTEX_TLS_DHE_PSK_WITH_NULL_SHA384
- *      IOTEX_TLS_DHE_PSK_WITH_NULL_SHA256
- *      IOTEX_TLS_DHE_PSK_WITH_NULL_SHA
- *      IOTEX_TLS_RSA_WITH_NULL_SHA256
- *      IOTEX_TLS_RSA_WITH_NULL_SHA
- *      IOTEX_TLS_RSA_WITH_NULL_MD5
- *      IOTEX_TLS_RSA_PSK_WITH_NULL_SHA384
- *      IOTEX_TLS_RSA_PSK_WITH_NULL_SHA256
- *      IOTEX_TLS_RSA_PSK_WITH_NULL_SHA
- *      IOTEX_TLS_PSK_WITH_NULL_SHA384
- *      IOTEX_TLS_PSK_WITH_NULL_SHA256
- *      IOTEX_TLS_PSK_WITH_NULL_SHA
- *
- * Uncomment this macro to enable the NULL cipher and ciphersuites
- */
-//#define IOTEX_CIPHER_NULL_CIPHER
-
-/**
- * \def IOTEX_CIPHER_PADDING_PKCS7
- *
- * IOTEX_CIPHER_PADDING_XXX: Uncomment or comment macros to add support for
- * specific padding modes in the cipher layer with cipher modes that support
- * padding (e.g. CBC)
- *
- * If you disable all padding modes, only full blocks can be used with CBC.
- *
- * Enable padding modes in the cipher layer.
- */
+#ifdef CONFIG_PSA_CIPHER_PADDING_PKCS7
 #define IOTEX_CIPHER_PADDING_PKCS7
+#endif
+
+#ifdef CONFIG_PSA_CIPHER_PADDING_ONE_AND_ZEROS
 #define IOTEX_CIPHER_PADDING_ONE_AND_ZEROS
+#endif
+
+#ifdef CONFIG_PSA_CIPHER_PADDING_ZEROS_AND_LEN
 #define IOTEX_CIPHER_PADDING_ZEROS_AND_LEN
+#endif
+
+#ifdef CONFIG_PSA_CIPHER_PADDING_ZEROS
 #define IOTEX_CIPHER_PADDING_ZEROS
+#endif
 
 /** \def IOTEX_CTR_DRBG_USE_128_BIT_KEY
  *
@@ -990,44 +715,17 @@
  */
 //#define IOTEX_FS_IO
 
-/**
- * \def IOTEX_NO_DEFAULT_ENTROPY_SOURCES
- *
- * Do not add default entropy sources in iotex_entropy_init().
- *
- * This is useful to have more control over the added entropy sources in an
- * application.
- *
- * Uncomment this macro to prevent loading of default entropy functions.
- */
-//#define IOTEX_NO_DEFAULT_ENTROPY_SOURCES
+#ifdef CONFIG_PSA_NO_DEFAULT_ENTROPY_SOURCES
+#define IOTEX_NO_DEFAULT_ENTROPY_SOURCES
+#endif
 
-/**
- * \def IOTEX_NO_PLATFORM_ENTROPY
- *
- * Do not use built-in platform entropy functions.
- * This is useful if your platform does not support
- * standards like the /dev/urandom or Windows CryptoAPI.
- *
- * Uncomment this macro to disable the built-in platform entropy functions.
- */
+#ifdef CONFIG_PSA_NO_PLATFORM_ENTROPY
 #define IOTEX_NO_PLATFORM_ENTROPY
+#endif
 
-/**
- * \def IOTEX_ENTROPY_FORCE_SHA256
- *
- * Force the entropy accumulator to use a SHA-256 accumulator instead of the
- * default SHA-512 based one (if both are available).
- *
- * Requires: IOTEX_SHA256_C
- *
- * On 32-bit systems SHA-256 can be much faster than SHA-512. Use this option
- * if you have performance concerns.
- *
- * This option is only useful if both IOTEX_SHA256_C and
- * IOTEX_SHA512_C are defined. Otherwise the available hash module is used.
- */
-//#define IOTEX_ENTROPY_FORCE_SHA256
+#ifdef CONFIG_PSA_ENTROPY_FORCE_SHA256
+#define IOTEX_ENTROPY_FORCE_SHA256
+#endif
 
 /**
  * \def IOTEX_ENTROPY_NV_SEED
@@ -1169,43 +867,9 @@
  */
 //#define IOTEX_PSA_CRYPTO_DRIVERS
 
-/** \def IOTEX_PSA_CRYPTO_EXTERNAL_RNG
- *
- * Make the PSA Crypto module use an external random generator provided
- * by a driver, instead of IOTEX's entropy and DRBG modules.
- *
- * \note This random generator must deliver random numbers with cryptographic
- *       quality and high performance. It must supply unpredictable numbers
- *       with a uniform distribution. The implementation of this function
- *       is responsible for ensuring that the random generator is seeded
- *       with sufficient entropy. If you have a hardware TRNG which is slow
- *       or delivers non-uniform output, declare it as an entropy source
- *       with iotex_entropy_add_source() instead of enabling this option.
- *
- * If you enable this option, you must configure the type
- * ::iotex_psa_external_random_context_t in psa/crypto_platform.h
- * and define a function called iotex_psa_external_get_random()
- * with the following prototype:
- * ```
- * psa_status_t iotex_psa_external_get_random(
- *     iotex_psa_external_random_context_t *context,
- *     uint8_t *output, size_t output_size, size_t *output_length);
- * );
- * ```
- * The \c context value is initialized to 0 before the first call.
- * The function must fill the \c output buffer with \p output_size bytes
- * of random data and set \c *output_length to \p output_size.
- *
- * Requires: IOTEX_PSA_CRYPTO_C
- *
- * \warning If you enable this option, code that uses the PSA cryptography
- *          interface will not use any of the entropy sources set up for
- *          the entropy module, nor the NV seed that IOTEX_ENTROPY_NV_SEED
- *          enables.
- *
- * \note This option is experimental and may be removed without notice.
- */
+#ifdef CONFIG_PSA_CRYPTO_EXTERNAL_RNG
 #define IOTEX_PSA_CRYPTO_EXTERNAL_RNG
+#endif
 
 /**
  * \def IOTEX_PSA_CRYPTO_SPM
@@ -1221,18 +885,9 @@
  */
 //#define IOTEX_PSA_CRYPTO_SPM
 
-/**
- * \def IOTEX_PSA_INJECT_ENTROPY
- *
- * Enable support for entropy injection at first boot. This feature is
- * required on systems that do not have a built-in entropy source (TRNG).
- * This feature is currently not supported on systems that have a built-in
- * entropy source.
- *
- * Requires: IOTEX_PSA_CRYPTO_STORAGE_C, IOTEX_ENTROPY_NV_SEED
- *
- */
-//#define IOTEX_PSA_INJECT_ENTROPY
+#ifdef CONFIG_PSA_INJECT_ENTROPY
+#define IOTEX_PSA_INJECT_ENTROPY
+#endif
 
 /**
  * \def IOTEX_RSA_NO_CRT
@@ -2313,19 +1968,9 @@
  */
 #define IOTEX_ECP_C
 
-/**
- * \def IOTEX_ENTROPY_C
- *
- * Enable the platform-specific entropy code.
- *
- * Module:  library/entropy.c
- * Caller:
- *
- * Requires: IOTEX_SHA512_C or IOTEX_SHA256_C
- *
- * This module provides a generic entropy pool
- */
+#ifdef CONFIG_PSA_ENTROPY_C
 #define IOTEX_ENTROPY_C
+#endif
 
 /**
  * \def IOTEX_ERROR_C
@@ -2627,25 +2272,9 @@
  */
 //#define IOTEX_PKCS12_C
 
-/**
- * \def IOTEX_PLATFORM_C
- *
- * Enable the platform abstraction layer that allows you to re-assign
- * functions like calloc(), free(), snprintf(), printf(), fprintf(), exit().
- *
- * Enabling IOTEX_PLATFORM_C enables to use of IOTEX_PLATFORM_XXX_ALT
- * or IOTEX_PLATFORM_XXX_MACRO directives, allowing the functions mentioned
- * above to be specified at runtime or compile time respectively.
- *
- * \note This abstraction layer must be enabled on Windows (including MSYS2)
- * as other module rely on it for a fixed snprintf implementation.
- *
- * Module:  library/platform.c
- * Caller:  Most other .c files
- *
- * This module enables abstraction of common (libc) functions.
- */
-//#define IOTEX_PLATFORM_C
+#ifdef CONFIG_GENERIC_PLATFORM_C
+#define IOTEX_PLATFORM_C
+#endif
 
 /**
  * \def IOTEX_POLY1305_C
@@ -2657,20 +2286,9 @@
  */
 #define IOTEX_POLY1305_C
 
-/**
- * \def IOTEX_PSA_CRYPTO_C
- *
- * Enable the Platform Security Architecture cryptography API.
- *
- * Module:  library/psa_crypto.c
- *
- * Requires: IOTEX_CIPHER_C,
- *           either IOTEX_CTR_DRBG_C and IOTEX_ENTROPY_C,
- *           or IOTEX_HMAC_DRBG_C and IOTEX_ENTROPY_C,
- *           or IOTEX_PSA_CRYPTO_EXTERNAL_RNG.
- *
- */
+#ifdef CONFIG_PSA_CRYPTO_C
 #define IOTEX_PSA_CRYPTO_C
+#endif
 
 /**
  * \def IOTEX_PSA_CRYPTO_SE_C
@@ -2688,54 +2306,21 @@
  */
 //#define IOTEX_PSA_CRYPTO_SE_C
 
-/**
- * \def IOTEX_PSA_CRYPTO_STORAGE_C
- *
- * Enable the Platform Security Architecture persistent key storage.
- *
- * Module:  library/psa_crypto_storage.c
- *
- * Requires: IOTEX_PSA_CRYPTO_C,
- *           either IOTEX_PSA_ITS_FILE_C or a native implementation of
- *           the PSA ITS interface
- */
+#ifdef CONFIG_PSA_KEY_STORAGE_C
 #define IOTEX_PSA_CRYPTO_STORAGE_C
+#endif
 
-/**
- * \def IOTEX_PSA_ITS_FILE_C
- *
- * Enable the emulation of the Platform Security Architecture
- * Internal Trusted Storage (PSA ITS) over files.
- *
- * Module:  library/psa_its_file.c
- *
- * Requires: IOTEX_FS_IO
- */
-//#define IOTEX_PSA_ITS_FILE_C
+#ifdef CONFIG_PSA_ITS_FS_C
+#define IOTEX_PSA_ITS_FILE_C
+#endif
 
-/**
- * \def IOTEX_PSA_ITS_FLASH_C
- *
- * Enable the emulation of the Platform Security Architecture
- * Internal Trusted Storage (PSA ITS) over flash.
- *
- * Module:  library/psa_its_flash.c
- *
- * Requires: 
- */
-//#define IOTEX_PSA_ITS_FLASH_C
+#ifdef CONFIG_PSA_ITS_FLASH_C
+#define IOTEX_PSA_ITS_FLASH_C
+#endif
 
-/**
- * \def IOTEX_PSA_ITS_NVS_C
- *
- * Enable the emulation of the Platform Security Architecture
- * Internal Trusted Storage (PSA ITS) over NVS.
- *
- * Module:  library/psa_its_nvs.c
- *
- * Requires: 
- */
+#ifdef CONFIG_PSA_ITS_NVS_C
 #define IOTEX_PSA_ITS_NVS_C
+#endif
 
 /**
  * \def IOTEX_RIPEMD160_C
@@ -3060,29 +2645,9 @@
  */
 //#define IOTEX_THREADING_C
 
-/**
- * \def IOTEX_TIMING_C
- *
- * Enable the semi-portable timing interface.
- *
- * \note The provided implementation only works on POSIX/Unix (including Linux,
- * BSD and OS X) and Windows. On other platforms, you can either disable that
- * module and provide your own implementations of the callbacks needed by
- * \c iotex_ssl_set_timer_cb() for DTLS, or leave it enabled and provide
- * your own implementation of the whole module by setting
- * \c IOTEX_TIMING_ALT in the current file.
- *
- * \note The timing module will include time.h on suitable platforms
- *       regardless of the setting of IOTEX_HAVE_TIME, unless
- *       IOTEX_TIMING_ALT is used. See timing.c for more information.
- *
- * \note See also our Knowledge Base article about porting to a new
- * environment:
- * https://tls.mbed.org/kb/how-to/how-do-i-port-mbed-tls-to-a-new-environment-OS
- *
- * Module:  library/timing.c
- */
-//#define IOTEX_TIMING_C
+#ifdef CONFIG_SYS_TIMING_C
+#define IOTEX_TIMING_C
+#endif
 
 /**
  * \def IOTEX_VERSION_C
@@ -3094,106 +2659,6 @@
  * This module provides run-time version information.
  */
 #define IOTEX_VERSION_C
-
-/**
- * \def IOTEX_X509_USE_C
- *
- * Enable X.509 core for using certificates.
- *
- * Module:  library/x509.c
- * Caller:  library/x509_crl.c
- *          library/x509_crt.c
- *          library/x509_csr.c
- *
- * Requires: IOTEX_ASN1_PARSE_C, IOTEX_BIGNUM_C, IOTEX_OID_C,
- *           IOTEX_PK_PARSE_C
- *
- * This module is required for the X.509 parsing modules.
- */
-//#define IOTEX_X509_USE_C
-
-/**
- * \def IOTEX_X509_CRT_PARSE_C
- *
- * Enable X.509 certificate parsing.
- *
- * Module:  library/x509_crt.c
- * Caller:  library/ssl_tls.c
- *          library/ssl*_client.c
- *          library/ssl*_server.c
- *
- * Requires: IOTEX_X509_USE_C
- *
- * This module is required for X.509 certificate parsing.
- */
-//#define IOTEX_X509_CRT_PARSE_C
-
-/**
- * \def IOTEX_X509_CRL_PARSE_C
- *
- * Enable X.509 CRL parsing.
- *
- * Module:  library/x509_crl.c
- * Caller:  library/x509_crt.c
- *
- * Requires: IOTEX_X509_USE_C
- *
- * This module is required for X.509 CRL parsing.
- */
-//#define IOTEX_X509_CRL_PARSE_C
-
-/**
- * \def IOTEX_X509_CSR_PARSE_C
- *
- * Enable X.509 Certificate Signing Request (CSR) parsing.
- *
- * Module:  library/x509_csr.c
- * Caller:  library/x509_crt_write.c
- *
- * Requires: IOTEX_X509_USE_C
- *
- * This module is used for reading X.509 certificate request.
- */
-//#define IOTEX_X509_CSR_PARSE_C
-
-/**
- * \def IOTEX_X509_CREATE_C
- *
- * Enable X.509 core for creating certificates.
- *
- * Module:  library/x509_create.c
- *
- * Requires: IOTEX_BIGNUM_C, IOTEX_OID_C, IOTEX_PK_WRITE_C
- *
- * This module is the basis for creating X.509 certificates and CSRs.
- */
-//#define IOTEX_X509_CREATE_C
-
-/**
- * \def IOTEX_X509_CRT_WRITE_C
- *
- * Enable creating X.509 certificates.
- *
- * Module:  library/x509_crt_write.c
- *
- * Requires: IOTEX_X509_CREATE_C
- *
- * This module is required for X.509 certificate creation.
- */
-//#define IOTEX_X509_CRT_WRITE_C
-
-/**
- * \def IOTEX_X509_CSR_WRITE_C
- *
- * Enable creating X.509 Certificate Signing Requests (CSR).
- *
- * Module:  library/x509_csr_write.c
- *
- * Requires: IOTEX_X509_CREATE_C
- *
- * This module is required for X.509 certificate request writing.
- */
-//#define IOTEX_X509_CSR_WRITE_C
 
 /** \} name SECTION: mbed TLS modules */
 
@@ -3581,15 +3046,8 @@
  */
 //#define IOTEX_ECDH_VARIANT_EVEREST_ENABLED
 
-#define CRYPTO_USE_NOTHING      0
-#define CRYPTO_USE_MBEDTLS      1
-#define CRYPTO_USE_TINYCRYPO    2
-#define CRYPTO_USE_IOTEXCRYPO   3
 
-//#define IOTEX_PSA_CRYPTO_MODULE_USE   CRYPTO_USE_MBEDTLS
-#define IOTEX_PSA_CRYPTO_MODULE_USE   CRYPTO_USE_TINYCRYPO
-
-#if ((IOTEX_PSA_CRYPTO_MODULE_USE) == (CRYPTO_USE_MBEDTLS))
+#ifdef PSA_CRYPTO_BACKENDS_MBEDTLS
 #define IOTEX_PORTING_HEAD_FILE     "layer_conf/iotex_cryto_use_mbedtls.h"
 #define IOTEX_INCLUDE_PRE           mbedtls
 
@@ -3612,6 +3070,8 @@
 //#define IOTEX_CRYPTO_USE_ACCELERATION_LIB
 #define IOTEX_CRYPTO_USE_ACCELERATION_MBEDTLS
 
-//#define IOTEX_KEY_MANAGMENT
-
 /** \} name SECTION: Module configuration options */
+
+#ifdef CONFIG_GENERIC_CONFIG_CHECK_ENABLE
+#include "iotex_layer_config_check.h"
+#endif

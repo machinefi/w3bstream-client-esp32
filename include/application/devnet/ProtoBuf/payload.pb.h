@@ -17,10 +17,14 @@ typedef enum _Payload_UserDataType {
 } Payload_UserDataType;
 
 /* Struct definitions */
+typedef PB_BYTES_ARRAY_T(65) Payload_pubkey_t;
 typedef PB_BYTES_ARRAY_T(64) Payload_sign_t;
+typedef PB_BYTES_ARRAY_T(6) Payload_mac_t;
 typedef PB_BYTES_ARRAY_T(320) Payload_user_t;
 typedef struct _Payload {
+    Payload_pubkey_t pubkey;
     Payload_sign_t sign;
+    Payload_mac_t mac;
     Payload_UserDataType type;
     Payload_user_t user;
 } Payload;
@@ -39,19 +43,23 @@ extern "C" {
 
 
 /* Initializer values for message structs */
-#define Payload_init_default                     {{0, {0}}, _Payload_UserDataType_MIN, {0, {0}}}
-#define Payload_init_zero                        {{0, {0}}, _Payload_UserDataType_MIN, {0, {0}}}
+#define Payload_init_default                     {{0, {0}}, {0, {0}}, {0, {0}}, _Payload_UserDataType_MIN, {0, {0}}}
+#define Payload_init_zero                        {{0, {0}}, {0, {0}}, {0, {0}}, _Payload_UserDataType_MIN, {0, {0}}}
 
 /* Field tags (for use in manual encoding/decoding) */
-#define Payload_sign_tag                         1
-#define Payload_type_tag                         2
-#define Payload_user_tag                         3
+#define Payload_pubkey_tag                       1
+#define Payload_sign_tag                         2
+#define Payload_mac_tag                          3
+#define Payload_type_tag                         4
+#define Payload_user_tag                         5
 
 /* Struct field encoding specification for nanopb */
 #define Payload_FIELDLIST(X, a) \
-X(a, STATIC,   SINGULAR, BYTES,    sign,              1) \
-X(a, STATIC,   SINGULAR, UENUM,    type,              2) \
-X(a, STATIC,   SINGULAR, BYTES,    user,              3)
+X(a, STATIC,   SINGULAR, BYTES,    pubkey,            1) \
+X(a, STATIC,   SINGULAR, BYTES,    sign,              2) \
+X(a, STATIC,   SINGULAR, BYTES,    mac,               3) \
+X(a, STATIC,   SINGULAR, UENUM,    type,              4) \
+X(a, STATIC,   SINGULAR, BYTES,    user,              5)
 #define Payload_CALLBACK NULL
 #define Payload_DEFAULT NULL
 
@@ -61,7 +69,7 @@ extern const pb_msgdesc_t Payload_msg;
 #define Payload_fields &Payload_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Payload_size                             391
+#define Payload_size                             466
 
 #ifdef __cplusplus
 } /* extern "C" */

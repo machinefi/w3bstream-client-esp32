@@ -95,7 +95,6 @@ typedef int (*iotex_verify_message)(const uint8_t * input, size_t input_length, 
 enum IOTEX_MQTT_STATUS {
 	IOTEX_MQTT_DISCONNECTED,
 	IOTEX_MQTT_CONNECTED,
-	IOTEX_MQTT_SUB_COMPLATED,
 };
 
 typedef struct iotex_mqtt_ctx {
@@ -156,7 +155,7 @@ int iotex_dev_access_set_mqtt_status(enum IOTEX_MQTT_STATUS status);
 int iotex_dev_access_mqtt_input(uint8_t *topic, uint8_t *payload, uint32_t len);
 int iotex_dev_access_generate_dev_addr(const unsigned char* public_key, char *dev_address);
 
-int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type);
+int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type, int8_t mac[6]);
 char *iotex_dev_access_get_mqtt_connect_addr_in_format(void);
 char *iotex_dev_access_get_mqtt_connect_addr_in_url(void);
 int iotex_dev_access_get_mqtt_connect_port(void);

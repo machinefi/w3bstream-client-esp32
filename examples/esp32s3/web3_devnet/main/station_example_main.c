@@ -79,9 +79,9 @@
 
 #define IOTEX_SIGNKEY_ECC_MODE				PSA_ECC_FAMILY_SECP_K1
 
-#if ( IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_STATIC_DATA )
-static const uint8_t private_key[] = {0xa1, 0x73, 0x6f, 0xbf, 0x37, 0xa2, 0xfc, 0xb8, 0xfe, 0xe2, 0x02, 0xdb, 0x0c, 0x63, 0x91, 0xdf, 0xa4, 0x61, 0x86, 0x29, 0xb1, 0x86, 0xa6, 0x90, 0x65, 0x85, 0x2d, 0xfc, 0xd8, 0x8f, 0x58, 0x19};
-#endif
+//#if ( IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_STATIC_DATA )
+//static const uint8_t private_key[] = {0xa1, 0x73, 0x6f, 0xbf, 0x37, 0xa2, 0xfc, 0xb8, 0xfe, 0xe2, 0x02, 0xdb, 0x0c, 0x63, 0x91, 0xdf, 0xa4, 0x61, 0x86, 0x29, 0xb1, 0x86, 0xa6, 0x90, 0x65, 0x85, 0x2d, 0xfc, 0xd8, 0x8f, 0x58, 0x19};
+//#endif
 
 #if ( IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_PRNG )
 #define IOTEX_SEED_USER_DEFINE              69834
@@ -99,8 +99,6 @@ static EventGroupHandle_t s_wifi_event_group;
 static const char *TAG = "wifi station";
 
 static int s_retry_num = 0;
-
-psa_key_id_t key_id = 0;
 
 esp_mqtt_client_handle_t mqtt_client = NULL;
 
@@ -302,7 +300,7 @@ static void mqtt_app_start(void)
 		.broker.address.port      = 1883,
 		.broker.address.transport = MQTT_TRANSPORT_OVER_TCP,
 #else
-		.broker.address.uri = iotex_dev_access_get_mqtt_connect_addr(),
+		.broker.address.uri = iotex_dev_access_get_mqtt_connect_addr_in_format(),
 #endif
 #endif
 	};
@@ -422,172 +420,6 @@ int iotex_sign_message_func(const uint8_t * input, size_t input_length, uint8_t 
 }
 #endif
 
-void iotex_generate_signkey(unsigned char *exported_key, unsigned int *key_len)
-{
-    psa_status_t status;
-    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-
-    uint8_t exported[PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(KEY_BITS)];
-	size_t exported_length = 0;
-
-    printf("Generate a key pair...\n");
-
-	psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH | PSA_KEY_USAGE_EXPORT);
-	psa_set_key_algorithm(&attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
-	psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(IOTEX_SIGNKEY_ECC_MODE));
-	psa_set_key_bits(&attributes, KEY_BITS);
-
-	status = psa_generate_key(&attributes, &key_id);
-	if (status != PSA_SUCCESS) {
-		printf("Failed to generate key %d\n", status);
-        return;
-	}
-
-#ifdef IOTEX_DEBUG_ENABLE
-	printf("Success to generate a key pair: key id : %x\n", key_id);
-#endif
-
-    status = psa_export_key(key_id, exported_key, 32, &exported_length);
-	if (status != PSA_SUCCESS) {
-		printf("Failed to export pair key %d\n", status);
-        return;
-	}
-
-#ifdef IOTEX_DEBUG_ENABLE
-	printf("Exported a pair key len %d\n", exported_length);
-#endif
-
-    *key_len = exported_length;
-
-#ifdef IOTEX_DEBUG_ENABLE
-    for (int i = 0; i < exported_length; i++)
-    {
-        printf("%02x ", exported_key[i]);
-    }
-    printf("\n");
-#endif
-
-    status = psa_export_public_key(key_id, exported, sizeof(exported), &exported_length);
-	if (status != PSA_SUCCESS) {
-		printf("Failed to export public key %d\n", status);
-        return;
-	}
-#ifdef IOTEX_DEBUG_ENABLE
-	printf("Exported a public key len %d\n", exported_length);
-
-	for (int i = 0; i < exported_length; i++)
-	{
-        printf("%02x ", exported[i]);
-	}
-	printf("\n");
-#endif
-}
-
-
-
-void iotex_import_key_example(void)
-{
-    psa_key_attributes_t attributes = PSA_KEY_ATTRIBUTES_INIT;
-    psa_status_t status;
-    unsigned char prikey[32] = {0};
-    char dev_address[100] = {0};
-
-    uint8_t key_mode = 0;
-
-#if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_STATIC_DATA)
-
-    memcpy(prikey, private_key, sizeof(prikey));
-    key_mode = 1;
-
-#endif
-
-#if (IOTEX_SIGNKEY_USE_MODE == IOTEX_SIGNKEY_USE_PRNG)
-
-    unsigned int prikey_len = 0;
-
-extern void default_SetSeed(unsigned int seed);
-    default_SetSeed(IOTEX_SEED_USER_DEFINE);
-    iotex_generate_signkey(prikey, &prikey_len);
-
-    key_mode = 0;
-#endif
-
-    if( key_mode ) {
-
-        /* Set key attributes */
-        psa_set_key_usage_flags(&attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
-        psa_set_key_algorithm(&attributes, PSA_ALG_ECDSA(PSA_ALG_SHA_256));
-        psa_set_key_type(&attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(IOTEX_SIGNKEY_ECC_MODE));
-        psa_set_key_bits(&attributes, 256);
-
-        /* Import the key */
-        status = psa_import_key(&attributes, prikey, 32, &key_id);
-        if (status != PSA_SUCCESS) {
-    #ifdef IOTEX_DEBUG_ENABLE
-            printf("Failed to import pri key err %d\n", status);
-    #endif
-            key_id = 0;
-
-            return;
-        }
-    #ifdef IOTEX_DEBUG_ENABLE
-        else
-            printf("Success to import pri key keyid %x\n", key_id);
-    #endif
-
-    }
-
-    status = psa_export_public_key(key_id, exported, sizeof(exported), (size_t *)&exported_len);
-	if (status != PSA_SUCCESS) {
-#ifdef IOTEX_DEBUG_ENABLE
-		printf("Failed to export public key %d\n", status);
-#endif
-        return;
-	}
-
-#ifdef IOTEX_DEBUG_ENABLE
-	printf("Exported a public key len %d\n", exported_len);
-	for (int i = 0; i < exported_len; i++)
-	{
-        printf("%02x ", exported[i]);
-	}
-	printf("\n");
-#endif
-
-	iotex_dev_access_generate_dev_addr((const unsigned char *)exported, dev_address);
-    printf("Dev_addr : %s\n", dev_address);
-
-#ifdef IOTEX_DEBUG_ENABLE_EXT
-    unsigned char inbuf[] = "hello devnet";
-	unsigned char buf[65] = {0};
-    unsigned int  sinlen   = 0;
-
-    status = psa_sign_message( key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256), inbuf, strlen((const char *)inbuf), (unsigned char *)buf, 65, &sinlen);
-    if (status != PSA_SUCCESS) {
-		printf("Failed to sign message %d\n", status);
-	} else {
-        printf("Success to sign message %d\n", sinlen);
-    }
-
-#ifdef IOTEX_DEBUG_ENABLE
-	printf("Exported a sign len %d\n", sinlen);
-	for (int i = 0; i < sinlen; i++)
-	{
-        printf("%02x ", buf[i]);
-	}
-	printf("\n");
-#endif
-
-    status = psa_verify_message( key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256), inbuf, strlen((const char *)inbuf), (unsigned char *)buf, sinlen);
-    if (status != PSA_SUCCESS) {
-		printf("Failed to verify message %d\n", status);
-	} else  {
-        printf("Success to verify message\n");
-    }
-#endif
-
-}
-
 typedef struct __packed user_data
 {
    int i;
@@ -637,7 +469,6 @@ void iotex_devnet_upload_data_example_pb(void) {
 	iotex_dev_access_data_upload_with_userdata(sensor_buf, ostream_sensor.bytes_written, IOTEX_USER_DATA_TYPE_PB);
 }
 
-int flag = 1;
 extern void default_SetSeed(unsigned int seed);
 void app_main(void)
 {
@@ -672,11 +503,11 @@ void app_main(void)
     localtime_r(&now, &timeinfo);
     strftime(strftime_buf, sizeof(strftime_buf), "%c", &timeinfo);
     ESP_LOGI(TAG, "The current date/time in Shanghai is: %s", strftime_buf);
+    default_SetSeed(esp_random());
+
 
     iotex_wsiotsdk_init(iotex_time_set_func, iotex_mqtt_pubscription, iotex_mqtt_subscription);
 
-    default_SetSeed(esp_random());
-    iotex_import_key_example();
 
     ESP_LOGI(TAG, "ESP_MQTT_START");
     mqtt_app_start();

@@ -16,7 +16,7 @@
  */
 #include "common.h"
 
-#if defined(IOTEX_PSA_ITS_FILE_C)
+#if defined(CONFIG_PSA_ITS_FS_C)
 
 #if defined(IOTEX_PLATFORM_C)
 #include "iotex/platform.h"

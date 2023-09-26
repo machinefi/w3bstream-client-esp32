@@ -1,0 +1,235 @@
+mainmenu "W3B Stream SDK Config"
+
+menu "Generic"
+
+    menu "Version"
+        
+        config GENERIC_SDK_VERSION
+            hex  "W3BStream SDK Version"
+            default 0x001000000
+            help
+                This is an optional version symbol that enables compatibility handling of W3Bstream SDK.
+                
+        config GENERIC_SDK_CONFIG_VERSION
+            hex  "Config System Version"
+            default 0x001000000
+            help
+                This is an optional version symbol that enables compatibility handling of config files.
+
+    endmenu
+
+    menu "System Configration"
+
+        config SYS_HAVE_ASM
+            bool "Support ASM"
+            default y
+            help
+                Disable to disable the use of assembly code.
+
+        config SYS_NO_UDBL_DIVISION
+            bool "Platform Lacks Support For Double-width Integer Division"
+            default n
+            help
+                The bignum code uses double-width division to speed up some operations.
+                Double-width division is often implemented in software that needs to
+                be linked with the program. The presence of a double-width integer
+                type is usually detected automatically through preprocessor macros,
+                but the automatic detection cannot know whether the code needs to
+                and can be linked with an implementation of division for that type.
+                By default division is assumed to be usable if the type is present.
+                Enable this option to prevent the use of double-width division.
+                
+                Note that division for the native integer type is always required.
+                Furthermore, a 64-bit type is always required even on a 32-bit
+                platform, but it need not support multiplication or division. In some
+                cases it is also desirable to disable some double-width operations. For
+                example, if double-width division is implemented in software, disabling
+                it can reduce code size in some embedded targets.
+
+        config SYS_NO_64BIT_MULTIPLICATION
+            bool "Platform Lacks support For 32x32 -> 64-bit Multiplication."
+            default n
+            help
+                Some parts of the library may use multiplication of two unsigned 32-bit
+                operands with a 64-bit result in order to speed up computations. On some
+                platforms, this is not available in hardware and has to be implemented in
+                software, usually in a library provided by the toolchain.
+                
+                Sometimes it is not desirable to have to link to that library. This option
+                removes the dependency of that library on platforms that lack a hardware
+                64-bit multiplier by embedding a software implementation in Mbed TLS.
+                
+                Note that depending on the compiler, this may decrease performance compared
+                to using the library function provided by the toolchain.
+        
+        config SYS_HAVE_SSE2
+            bool "Support SSE2 Instruction Set."
+            default n
+            help
+                Enable if the CPU supports SSE2 (IA-32 specific).
+
+        config SYS_TIMING_C
+            bool "Enable the Semi-portable Timing Interface"
+            default n
+            help 
+                The provided implementation only works on POSIX/Unix (including Linux,
+                BSD and OS X) and Windows. On other platforms, you can either disable that
+                module and provide your own implementations of the callbacks needed by
+                iotex_ssl_set_timer_cb() for DTLS, or leave it enabled and provide
+                your own implementation of the whole module by setting
+                SYS_TIMING_ALT in the current file.
+                
+                The timing module will include time.h on suitable platforms
+                        regardless of the setting of SYS_HAVE_TIME, unless
+                        IOTEX_TIMING_ALT is used. See timing.c for more information.
+                
+                Module:  library/timing.c
+        
+        config SYS_HAVE_TIME
+            bool "Support Time Functions"
+            default n
+            help
+                System has time.h and time().
+                The time does not need to be correct, only time differences are used,
+                by contrast with SYS_HAVE_TIME_DATE
+                
+                Defining SYS_HAVE_TIME allows you to specify 
+                    PLATFORM_TIME_ALT,
+                    PLATFORM_TIME_MACRO, 
+                    PLATFORM_TIME_TYPE_MACRO, 
+                    PLATFORM_STD_TIME.
+                
+                Disable if your system does not support time functions.
+                
+                If SYS_TIMING_C is set - to enable the semi-portable timing
+                        interface - timing.c will include time.h on suitable platforms
+                        regardless of the setting of SYS_HAVE_TIME, unless
+                        SYS_TIMING_ALT is used. See timing.c for more information.
+
+        config SYS_HAVE_TIME_DATE
+            bool "Support Correct Clock"
+            default n
+            help
+                System has time.h, time(), and an implementation for iotex_platform_gmtime_r() (see below).
+                The time needs to be correct (not necessarily very accurate, but at least the date should be correct). This is used to verify the validity period of X.509 certificates.
+                
+                Disable if your system does not have a correct clock.
+
+        config SYS_PLATFORM_MEMORY
+            bool "Enable the Memory Allocation Layer (MAL)"
+            default n
+            help
+                By default W3Bstream SDK uses the system-provided calloc() and free().
+                This allows different allocators (self-implemented or provided) to be provided to the platform abstraction layer.
+
+                Enabling SYS_PLATFORM_MEMORY without the PLATFORM_{FREE,CALLOC}_MACROs will provide
+                "iotex_platform_set_calloc_free()" allowing you to set an alternative calloc() and free() function pointer at runtime.
+                
+                Enabling SYS_PLATFORM_MEMORY and specifying PLATFORM_{CALLOC,FREE}_MACROs will allow you to specify the
+                alternate function at compile time.
+
+                Enable this layer to allow use of alternative memory allocators.
+
+        config SYS_PLATFORM_NO_STD_FUNCTIONS
+            bool "Do Not Assign Standard Functions In the Platform Layer"
+            default n
+            help
+                Do not assign standard functions in the platform layer 
+                (e.g. calloc() to SYS_PLATFORM_STD_CALLOC and printf() to SYS_PLATFORM_STD_PRINTF)
+
+                Enable to prevent default assignment of standard functions in the platform layer.
+
+        menuconfig PLATFORM_EXIT_ALT  
+            bool "Enable alternate EXIT Implementation"
+            default n
+            help 
+                PLATFORM_XXX_ALT: Uncomment a macro to let SDK support the
+                function in the platform abstraction layer.
+                
+                Example: In case you uncomment PLATFORM_PRINTF_ALT, SDK will
+                provide a function "iotex_platform_set_printf()" that allows you to set an
+                alternative printf function pointer.
+                
+                All these define require SYS_PLATFORM_C to be defined!
+                
+                PLATFORM_SNPRINTF_ALT is required on Windows;
+                it will be enabled automatically by check_config.h
+                
+                PLATFORM_XXX_ALT cannot be defined at the same time as PLATFORM_XXX_MACRO!
+                
+                PLATFORM_TIME_ALT requires SYS_HAVE_TIME
+                
+                Enable a macro to enable alternate implementation of specific base platform function
+
+            if PLATFORM_EXIT_ALT
+
+                config PLATFORM_SETBUF_ALT
+                    bool "Enable alternate SETBUF Implementation"
+                    default n
+
+                config PLATFORM_TIME_ALT
+                    bool "Enable alternate TIME Implementation"
+                    depends on SYS_HAVE_TIME
+                    default n
+
+                config PLATFORM_FPRINTF_ALT
+                    bool "Enable alternate FPRINTF Implementation"
+                    default n
+
+                config PLATFORM_PRINTF_ALT
+                    bool "Enable alternate PRINTF Implementation"
+                    default n
+
+                config PLATFORM_SNPRINTF_ALT
+                    bool "Enable alternate SNPRINTF Implementation"
+                    default n
+                        
+                config PLATFORM_VSNPRINTF_ALT
+                    bool "Enable alternate VSNPRINTF Implementation"
+                    default n
+
+                config PLATFORM_NV_SEED_ALT
+                    bool "Enable alternate NV SEED Implementation"
+                    default n                
+
+                config PLATFORM_SETUP_TEARDOWN_ALT
+                    bool "Enable alternate SETUP TEARDOWN Implementation"
+                    default n
+
+            endif
+    endmenu
+
+    menu "Platform Configration"
+        
+        config GENERIC_PLATFORM_C
+            bool "Enable the Platform Abstraction Layer"
+            default n
+            help 
+                Enable the platform abstraction layer that allows you to re-assign
+                functions like calloc(), free(), snprintf(), printf(), fprintf(), exit().
+                
+                Enabling GENERIC_PLATFORM_C enables to use of PLATFORM_XXX_ALT
+                or PLATFORM_XXX_MACRO directives, allowing the functions mentioned
+                above to be specified at runtime or compile time respectively.
+                
+                This abstraction layer must be enabled on Windows (including MSYS2)
+                as other module rely on it for a fixed snprintf implementation.
+                
+                Module:  library/platform.c
+                Caller:  Most other .c files
+                
+                This module enables abstraction of common (libc) functions.
+    endmenu
+
+    config GENERIC_DEBUG_ENABLE
+        bool "Enable Generic Debug"
+        default n
+
+    config GENERIC_CONFIG_CHECK_ENABLE
+        bool "Enable SDK Config Check"
+        default y 
+endmenu
+
+source "../../psa_layer/Kconfig"
+source "../../application/devnet/Kconfig"
+source "../../hal/Kconfig"
