@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /* Initializer values for message structs */
-#define Upload_init_default                      {false, Header_init_default, false, Payload_init_default}
+#define Upload_init_default                      {true, Header_init_default, true, Payload_init_default} 
 #define Upload_init_zero                         {false, Header_init_zero, false, Payload_init_zero}
 
 /* Field tags (for use in manual encoding/decoding) */
@@ -47,7 +47,7 @@ extern const pb_msgdesc_t Upload_msg;
 #define Upload_fields &Upload_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Upload_size                              597
+#define Upload_size                              672
 
 #ifdef __cplusplus
 } /* extern "C" */
