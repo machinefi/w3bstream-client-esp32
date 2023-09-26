@@ -1,3 +1,5 @@
+string(REPLACE "\\" "/" ESP_IDF_PATH $ENV{IDF_PATH})
+
 idf_component_register(SRCS "wsiotsdk.c"
 							"crypto/aes_decrypt.c"
 							"crypto/aes_encrypt.c"
@@ -48,7 +50,10 @@ idf_component_register(SRCS "wsiotsdk.c"
 							"hal/flash/soc/esp32/flash.c"
 							"hal/nvs/nvs_common.c"
 							"hal/nvs/soc/esp32/nvs_esp32.c"
-                    INCLUDE_DIRS "include" "include/application/devnet" "include/backends" "$ENV{IDF_PATH}components/nvs_flash/include" "$ENV{IDF_PATH}components/esp_partition/include"
+                    INCLUDE_DIRS "include" 
+							"include/application/devnet" "include/backends" 
+							"${ESP_IDF_PATH}/components/nvs_flash/include" 
+							"${ESP_IDF_PATH}/components/esp_partition/include"
                     REQUIRES mbedtls)
 
 target_compile_options(${COMPONENT_LIB} PRIVATE "-Wno-format")                    
