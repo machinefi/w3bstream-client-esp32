@@ -6,8 +6,12 @@
 #include "iotex_dev_access.h"
 
 #include "psa/crypto.h"
+#ifdef CONFIG_PSA_ITS_FLASH_C
 #include "hal/flash/flash_common.h"
+#endif
+#ifdef CONFIG_PSA_ITS_NVS_C
 #include "hal/nvs/nvs_common.h"
+#endif
 
 extern psa_key_id_t g_signkey;
 
@@ -165,12 +169,18 @@ void iotex_dev_access_loop(void) {
 	// TODO: Loop code here
 }
 
-int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type) {
+int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum UserData_Type type, int8_t mac[6]) {
 
 	char sign_buf[64]  = {0};
 	unsigned int  sign_len = 0;
 	char *message = NULL;
 	size_t message_len = 0;
+
+	if (NULL == dev_ctx || 0 == dev_ctx->inited)
+        return IOTEX_DEV_ACCESS_ERR_NO_INIT;
+
+	if (dev_ctx->mqtt_ctx.status != IOTEX_MQTT_CONNECTED)
+		return IOTEX_DEV_ACCESS_ERR_BAD_STATUS;
 
 	unsigned char *buffer = malloc(Upload_size);
 	if (NULL == buffer)
@@ -180,7 +190,7 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 		return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
 
 	pb_ostream_t ostream_upload = {0};
-	Upload upload = Upload_init_zero;
+	Upload upload = Upload_init_default;
 
 	upload.has_header = true;
 	strcpy(upload.header.event_id, IOTEX_EVENT_ID_DEFAULT);
@@ -230,6 +240,11 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
  	upload.payload.sign.size = sign_len;
  	memcpy(upload.payload.sign.bytes, sign_buf, sign_len);
 
+	upload.payload.pubkey.size = 65;
+    memcpy(upload.payload.pubkey.bytes, iotex_wsiotsdk_get_public_key(), 65);
+
+	upload.payload.mac.size = 6;
+	memcpy(upload.payload.mac.bytes, mac, 6);
 
 	memset(buffer, 0, Upload_size);
 	ostream_upload  = pb_ostream_from_buffer(buffer, Upload_size);
