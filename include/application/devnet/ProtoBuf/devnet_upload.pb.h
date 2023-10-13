@@ -47,7 +47,7 @@ extern const pb_msgdesc_t Upload_msg;
 #define Upload_fields &Upload_msg
 
 /* Maximum encoded size of messages (where known) */
-#define Upload_size                              672
+#define Upload_size                              854
 
 #ifdef __cplusplus
 } /* extern "C" */
