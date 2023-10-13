@@ -3,6 +3,7 @@
 
 psa_key_id_t g_signkey = 1;
 static uint8_t exported[PSA_KEY_EXPORT_ECC_PUBLIC_KEY_MAX_SIZE(256) + 1];
+static uint8_t exported_dev_addr[65];
 
 static void iotex_export_public_key(void) {
 
@@ -37,6 +38,9 @@ static void iotex_export_public_key(void) {
     for (int i = 0; i < exported_length + 1; i++)
         printf("%.2x ", exported[i]);
     printf("\n");
+
+    iotex_dev_access_generate_dev_addr(exported, exported_dev_addr);
+    printf("Wallet Addr : %s\n", exported_dev_addr);
 }
 
 uint8_t * iotex_wsiotsdk_init(iotex_gettime get_time_func, iotex_mqtt_pub mqtt_pub, iotex_mqtt_sub mqtt_sub) {
@@ -49,6 +53,8 @@ uint8_t * iotex_wsiotsdk_init(iotex_gettime get_time_func, iotex_mqtt_pub mqtt_p
     iotex_dev_access_set_mqtt_func(mqtt_pub, mqtt_sub);
 
     iotex_export_public_key();
+
+    InitLowsCalc();
 
 #ifdef IOTEX_SIGN_VERIFY_TEST
     psa_status_t status;

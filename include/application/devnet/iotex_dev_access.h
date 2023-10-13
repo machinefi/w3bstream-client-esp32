@@ -95,6 +95,7 @@ typedef int (*iotex_verify_message)(const uint8_t * input, size_t input_length, 
 enum IOTEX_MQTT_STATUS {
 	IOTEX_MQTT_DISCONNECTED,
 	IOTEX_MQTT_CONNECTED,
+    IOTEX_MQTT_BIND_STATUS_OK,
 };
 
 typedef struct iotex_mqtt_ctx {
@@ -159,6 +160,11 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 char *iotex_dev_access_get_mqtt_connect_addr_in_format(void);
 char *iotex_dev_access_get_mqtt_connect_addr_in_url(void);
 int iotex_dev_access_get_mqtt_connect_port(void);
+
+int iotex_dev_access_query_dev_register_status(int8_t mac[6]);
+int iotex_dev_access_dev_register_confirm(int8_t mac[6]);
+
+int iotex_user_wallet_addr_set(char *buf, int32_t buf_len);
 
 #ifdef __cplusplus
 }

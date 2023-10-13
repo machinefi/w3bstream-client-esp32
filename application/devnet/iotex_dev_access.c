@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <time.h>
 
 #include "common.h"
 #include "iotex_dev_access.h"
@@ -13,9 +14,57 @@
 #include "hal/nvs/nvs_common.h"
 #endif
 
+#define USER_WALLET_ADDR_LEN_MAX 200
+#define DEFAULT_TIME_STAMP_UNIX_VALUE      1696688888
+
 extern psa_key_id_t g_signkey;
 
 iotex_dev_ctx_t *dev_ctx = NULL;
+
+static char wallet_addr[USER_WALLET_ADDR_LEN_MAX] = {0};
+
+static char str2Hex(char c) {
+
+    if (c >= '0' && c <= '9') {
+        return (c - '0');
+    }
+
+    if (c >= 'a' && c <= 'z') {
+        return (c - 'a' + 10);
+    }
+
+    if (c >= 'A' && c <= 'Z') {
+        return (c -'A' + 10);
+    }
+
+    return c;
+}
+
+static int hexStr2Bin(char *str, char *bin) {
+	
+    int i,j;
+    for(i = 0,j = 0; j < (strlen(str)>>1) ; i++,j++) {
+        bin[j] = (str2Hex(str[i]) <<4);
+        i++;
+        bin[j] |= str2Hex(str[i]);
+    }
+
+    return j; 
+}
+
+int iotex_user_wallet_addr_set(char *buf, int32_t buf_len) {
+
+    if (NULL == buf) 
+        return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
+
+	if (0 == buf_len || buf_len > USER_WALLET_ADDR_LEN_MAX)
+		return IOTEX_DEV_ACCESS_ERR_BAD_INPUT_PARAMETER;
+
+    memcpy(wallet_addr, buf, buf_len);
+
+    return 0;
+
+}
 
 int iotex_dev_access_init(void)
 {
@@ -179,7 +228,7 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 	if (NULL == dev_ctx || 0 == dev_ctx->inited)
         return IOTEX_DEV_ACCESS_ERR_NO_INIT;
 
-	if (dev_ctx->mqtt_ctx.status != IOTEX_MQTT_CONNECTED)
+	if (dev_ctx->mqtt_ctx.status != IOTEX_MQTT_BIND_STATUS_OK)
 		return IOTEX_DEV_ACCESS_ERR_BAD_STATUS;
 
 	unsigned char *buffer = malloc(Upload_size);
@@ -199,7 +248,8 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 	strcpy(upload.header.token, dev_ctx->mqtt_ctx.token);
 	upload.header.pub_time = IOTEX_PUB_TIME_TEST_DEFAULT;
 
- 	upload.payload.type = type;
+	upload.payload.ptype = Payload_PackageType_USERDATA;
+ 	upload.payload.dtype = type;
 
  	switch (type) {
 
@@ -246,6 +296,8 @@ int iotex_dev_access_data_upload_with_userdata(void *buf, size_t buf_len, enum U
 	upload.payload.mac.size = 6;
 	memcpy(upload.payload.mac.bytes, mac, 6);
 
+	upload.payload.has_pConfirm = false;
+
 	memset(buffer, 0, Upload_size);
 	ostream_upload  = pb_ostream_from_buffer(buffer, Upload_size);
 	if (!pb_encode(&ostream_upload, Upload_fields, &upload)) {
@@ -273,6 +325,194 @@ exit:
 	if (IOTEX_USER_DATA_TYPE_JSON == type &&  message) {
 		free(message);
 		message = NULL;
+	}
+
+	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
+}
+
+int iotex_dev_access_query_dev_register_status(int8_t mac[6]) {
+
+	char sign_buf[64]  = {0};
+	unsigned int  sign_len = 0;
+
+	if (NULL == dev_ctx || 0 == dev_ctx->inited)
+        return IOTEX_DEV_ACCESS_ERR_NO_INIT;
+
+	if (dev_ctx->mqtt_ctx.status != IOTEX_MQTT_CONNECTED)
+		return IOTEX_DEV_ACCESS_ERR_BAD_STATUS;
+
+	unsigned char *buffer = malloc(Upload_size);
+	if (NULL == buffer)
+		return IOTEX_DEV_ACCESS_ERR_ALLOCATE_FAIL;
+
+	pb_ostream_t ostream_upload = {0};
+	Upload upload = Upload_init_default;
+
+	upload.has_header = true;
+	strcpy(upload.header.event_id, IOTEX_EVENT_ID_DEFAULT);
+	strcpy(upload.header.pub_id,   IOTEX_PUB_ID_DEFAULT);
+	strcpy(upload.header.event_type, IOTEX_EVENT_TYPE_DEFAULT);
+	strcpy(upload.header.token, dev_ctx->mqtt_ctx.token);
+	upload.header.pub_time = IOTEX_PUB_TIME_TEST_DEFAULT;
+
+ 	upload.has_payload = true;
+ 	upload.payload.ptype = Payload_PackageType_QUERY;
+
+	upload.payload.mac.size = 6;
+	memcpy(upload.payload.mac.bytes, mac, 6);
+
+	memset(buffer, 0, Upload_size);
+	ostream_upload  = pb_ostream_from_buffer(buffer, Upload_size);
+	if (!pb_encode(&ostream_upload, Upload_fields, &upload)) {
+		printf("pb encode [event] error in [%s]\n", PB_GET_ERROR(&ostream_upload));
+		goto exit;
+	}
+
+#ifdef IOTEX_DEBUG_ENABLE
+	printf("Event Upload len %d\n", ostream_upload.bytes_written);
+
+	for (int i = 0; i < ostream_upload.bytes_written; i++) {
+		printf("%02x ", buffer[i]);
+	}
+	printf("\n");
+#endif
+
+	iotex_dev_access_send_data(buffer, ostream_upload.bytes_written);
+
+exit:
+	if(buffer) {
+		free(buffer);
+		buffer = NULL;
+	}
+
+	return IOTEX_DEV_ACCESS_ERR_SUCCESS;	
+}
+
+int iotex_dev_access_dev_register_confirm(int8_t mac[6]) {
+
+	char raw_data[24]  = {0};
+	char sign_buf[64]  = {0};
+	unsigned int  sign_len = 0;
+
+	if (NULL == dev_ctx || 0 == dev_ctx->inited)
+        return IOTEX_DEV_ACCESS_ERR_NO_INIT;
+
+	printf("dev_ctx->mqtt_ctx.status %d\n", dev_ctx->mqtt_ctx.status);
+	if (dev_ctx->mqtt_ctx.status != IOTEX_MQTT_CONNECTED)
+		return IOTEX_DEV_ACCESS_ERR_BAD_STATUS;
+
+	unsigned char *buffer = malloc(Upload_size);
+	if (NULL == buffer)
+		return IOTEX_DEV_ACCESS_ERR_ALLOCATE_FAIL;
+
+	uint32_t timestamp = time(0);
+	if (timestamp < DEFAULT_TIME_STAMP_UNIX_VALUE)
+		timestamp = DEFAULT_TIME_STAMP_UNIX_VALUE;
+
+	pb_ostream_t ostream_upload = {0};
+	Upload upload = Upload_init_default;
+	Upload deupload = Upload_init_zero;
+
+	upload.has_header = true;
+	strcpy(upload.header.event_id, IOTEX_EVENT_ID_DEFAULT);
+	strcpy(upload.header.pub_id,   IOTEX_PUB_ID_DEFAULT);
+	strcpy(upload.header.event_type, IOTEX_EVENT_TYPE_DEFAULT);
+	strcpy(upload.header.token, dev_ctx->mqtt_ctx.token);
+	upload.header.pub_time = IOTEX_PUB_TIME_TEST_DEFAULT;
+
+ 	upload.has_payload = true;
+ 	upload.payload.ptype = Payload_PackageType_COMFIRM;
+
+	upload.payload.mac.size = 6;
+	memcpy(upload.payload.mac.bytes, mac, 6);
+
+	upload.payload.pubkey.size = 65;
+    memcpy(upload.payload.pubkey.bytes, iotex_wsiotsdk_get_public_key(), 65);	
+
+	upload.payload.has_pConfirm = true;
+
+	upload.payload.pConfirm.owner.size = hexStr2Bin(wallet_addr + 2, upload.payload.pConfirm.owner.bytes);
+
+	memcpy(raw_data, upload.payload.pConfirm.owner.bytes, upload.payload.pConfirm.owner.size);
+	raw_data[upload.payload.pConfirm.owner.size]     = (char)((timestamp & 0xFF000000) >> 24);
+    raw_data[upload.payload.pConfirm.owner.size + 1] = (char)((timestamp & 0x00FF0000) >> 16);
+    raw_data[upload.payload.pConfirm.owner.size + 2] = (char)((timestamp & 0x0000FF00) >> 8);
+    raw_data[upload.payload.pConfirm.owner.size + 3] = (char)(timestamp & 0x000000FF);	
+
+	psa_sign_message( g_signkey, PSA_ALG_ECDSA(PSA_ALG_SHA_256), (const uint8_t *)(raw_data), upload.payload.pConfirm.owner.size + 4, (uint8_t *)sign_buf, 64, &sign_len);
+	LowsCalc(sign_buf + 32, sign_buf + 32);
+
+	upload.payload.pConfirm.timestamp = timestamp;
+
+	upload.payload.pConfirm.signature.size = sign_len;
+	memcpy(upload.payload.pConfirm.signature.bytes, sign_buf, sign_len);
+
+	upload.payload.pConfirm.channel = 8183;
+	
+	memset(buffer, 0, Upload_size);
+	ostream_upload  = pb_ostream_from_buffer(buffer, Upload_size);
+	if (!pb_encode(&ostream_upload, Upload_fields, &upload)) {
+		printf("pb encode [event] error in [%s]\n", PB_GET_ERROR(&ostream_upload));
+		goto exit;
+	}
+
+#ifdef IOTEX_DEBUG_ENABLE
+	printf("Event Upload len %d\n", ostream_upload.bytes_written);
+	for (int i = 0; i < ostream_upload.bytes_written; i++) {
+		printf("%02x ", buffer[i]);
+	}
+	printf("\n");
+#endif
+
+	iotex_dev_access_send_data(buffer, ostream_upload.bytes_written);
+
+	pb_istream_t istream_upload = {0};
+	istream_upload  = pb_istream_from_buffer(buffer, ostream_upload.bytes_written); 
+	if (!pb_decode(&istream_upload, Upload_fields, &deupload)) {
+		printf("pb decode [event] error in [%s]\n", PB_GET_ERROR(&istream_upload));  
+		goto exit;
+	}
+
+	printf("De [Event ID] %s\n", deupload.header.event_id);
+	printf("De [Pub ID] %s\n", deupload.header.pub_id);
+	printf("De [Event_type] %s\n", deupload.header.event_type);
+	printf("De [Token] %s\n", deupload.header.token);
+	printf("De [Pub Time] %lld\n", deupload.header.pub_time);
+
+	printf("De [D type] %d\n", deupload.payload.dtype);
+	printf("De [P type] %d\n", deupload.payload.ptype);
+
+	printf("De [Pkey Len] %d\n", deupload.payload.pubkey.size);
+	if (deupload.payload.pubkey.size) {
+		printf("De [Pkey :] ");
+		for (int i = 0; i < deupload.payload.pubkey.size; i++)
+			printf("%02x ", deupload.payload.pubkey.bytes[i]);
+		printf("\n");
+	}
+
+	printf("De [MAC Len] %d\n", deupload.payload.mac.size);
+	if (deupload.payload.mac.size) {
+		printf("De [MAC :] ");
+		for (int i = 0; i < deupload.payload.mac.size; i++)
+			printf("%02x ", deupload.payload.mac.bytes[i]);
+		printf("\n");
+	}
+
+	printf("De [Timestamp] %d\n", deupload.payload.pConfirm.timestamp);
+	printf("De [Channel] %d\n", deupload.payload.pConfirm.channel);
+
+	printf("De [Signature Len] %d\n", deupload.payload.pConfirm.signature.size);
+	if (deupload.payload.pConfirm.signature.size) {
+		printf("De [Signature :] ");
+		for (int i = 0; i < deupload.payload.pConfirm.signature.size; i++)
+			printf("%02x ", deupload.payload.pConfirm.signature.bytes[i]);
+		printf("\n");
+	}	
+
+exit:
+	if(buffer) {
+		free(buffer);
+		buffer = NULL;
 	}
 
 	return IOTEX_DEV_ACCESS_ERR_SUCCESS;
